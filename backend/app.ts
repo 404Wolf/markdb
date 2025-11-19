@@ -3,7 +3,12 @@ import { fastify } from "fastify";
 
 const app = fastify().withTypeProvider<JsonSchemaToTsProvider>()
 
-app.get("/", {
+// Health check endpoint for fly.io
+app.get("/health", async (_request, reply) => {
+  return { status: "ok", timestamp: new Date().toISOString() };
+});
+
+app.get("/api", {
   schema: {
     querystring: {
       type: 'object',

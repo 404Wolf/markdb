@@ -4,15 +4,16 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    mdvalidate.url = "github:404wolf/mdvalidate";
   };
 
   outputs =
     {
-      self,
       nixpkgs,
       flake-utils,
+      mdvalidate,
       ...
-    }@inputs:
+    }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
@@ -21,11 +22,15 @@
       {
         devShells = {
           default = pkgs.mkShell {
-            packages = with pkgs; [
-              bun
-              prettierd
-              flyctl
-            ];
+            packages =
+              (with pkgs; [
+                bun
+                prettierd
+                flyctl
+              ])
+              ++ [
+                mdvalidate.packages.${system}.default
+              ];
           };
         };
       }
