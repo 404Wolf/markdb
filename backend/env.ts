@@ -1,4 +1,4 @@
-import { str, envsafe, port, url } from "envsafe";
+import { envsafe, str, url } from "envsafe";
 
 export const env = envsafe({
   MONGODB_USERNAME: str({
