@@ -1,13 +1,13 @@
 import { buildApplication, buildRouteMap } from "@stricli/core";
 import { name } from "../package.json";
-import { addCommand } from "./commands/nested/commands";
+import { validateCommand } from "./commands/validate";
 
 const routes = buildRouteMap({
   routes: {
-    add: addCommand,
+    validate: validateCommand,
   },
   docs: {
-    brief: "Simple calculator CLI",
+    brief: "MarkDB CLI",
   },
 });
 
