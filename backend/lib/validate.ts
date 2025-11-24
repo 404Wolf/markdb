@@ -14,10 +14,12 @@ export interface ValidateParams {
 export type ValidateResult =
   | {
     success: true;
+    /** Extracted mdvalidate output */
     output: object;
   }
   | {
     success: false;
+    /** For now, the raw stderr output from mdvalidate */
     error: string;
   };
 
@@ -28,8 +30,10 @@ export async function validate({
   input,
   schema,
 }: ValidateParams): Promise<ValidateResult> {
+  let schemaDir: string | undefined;
+
   try {
-    const schemaDir = await fs.mkdtemp(
+    schemaDir = await fs.mkdtemp(
       path.join(os.tmpdir(), "mdv-schema-"),
     );
     const schemaFile = path.join(schemaDir, "schema.json");
@@ -55,6 +59,14 @@ export async function validate({
         success: false,
         error: String(e),
       };
+    }
+  } finally {
+    if (schemaDir) {
+      try {
+        await fs.rm(schemaDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
     }
   }
 }
