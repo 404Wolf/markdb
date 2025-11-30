@@ -24,7 +24,10 @@ services:
     environment:
       - NODE_ENV=development
       - REDIS_URL=redis://redis:6379
-      - MONGODB_URL=mongodb://mongodb:27017/app
+      - MONGO_ROOT_URL=mongodb://mongodb:27017
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=password
+      - APP_NAME=markdb
     depends_on:
       - redis
       - mongodb
@@ -40,6 +43,9 @@ services:
     image: mongo:7
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
       - mongodb_data:/data/db
 
