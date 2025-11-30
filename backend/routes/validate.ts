@@ -1,8 +1,6 @@
-import { initServer } from '@ts-rest/fastify';
 import { validateContract } from '../contracts/validate';
 import { validate } from '../lib/validate';
-
-const s = initServer();
+import { s } from "../tsrest"
 
 export const validateRouter = s.router(validateContract, {
   validate: async ({ body: { input, schema } }) => {

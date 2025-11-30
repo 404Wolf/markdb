@@ -1,8 +1,6 @@
-import { initServer } from '@ts-rest/fastify';
 import { usersContract } from '../contracts/users';
 import { User } from '../db';
-
-const s = initServer();
+import { s } from "../tsrest"
 
 export const usersRouter = s.router(usersContract, {
   getById: async ({ params: { id } }) => {

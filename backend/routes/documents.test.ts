@@ -1,24 +1,32 @@
-import { initServer } from '@ts-rest/fastify';
-import { fastify } from 'fastify';
 import mongoose, { type HydratedDocument } from 'mongoose';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { Document, User, Tag, type IUser, type ITag, db } from '../db';
+import { fastify } from 'fastify';
+import { initServer } from '@ts-rest/fastify';
+import { db, type ISchema, type ITag, type IUser } from '../db';
+import { User } from '../db/schemas/User';
+import { Tag } from '../db/schemas/Tag';
+import { Schema } from '../db/schemas/Schema';
+import { Document } from '../db/schemas/Document';
 import { documentsRouter } from './documents';
+import { schemasRouter } from './schemas';
 
 const app = fastify();
 const s = initServer();
 
 app.register(s.plugin(documentsRouter));
+app.register(s.plugin(schemasRouter));
 
 let testUser: HydratedDocument<IUser>;
 let testTag1: HydratedDocument<ITag>;
-let testTag2: HydratedDocument<ITag>;
+let testSchema: HydratedDocument<ISchema>;
 
 beforeAll(async () => {
   await db;
+  await app.ready();
 });
 
 afterAll(async () => {
+  await app.close();
   await mongoose.connection.close();
 });
 
@@ -26,33 +34,49 @@ beforeEach(async () => {
   await Document.deleteMany({});
   await User.deleteMany({});
   await Tag.deleteMany({});
+  await Schema.deleteMany({});
   testUser = await User.create({
     name: 'Test User',
     email: 'test@example.com',
   });
   testTag1 = await Tag.create({ name: 'JavaScript' });
-  testTag2 = await Tag.create({ name: 'TypeScript' });
+  testSchema = await Schema.create({ name: 'Test Schema', content: '# Test' });
 });
 
 describe('Documents API', () => {
   describe('POST /api/documents', () => {
     it('should create a new document', async () => {
+      const schemaResponse = await app.inject({
+        method: 'POST',
+        url: '/api/schemas',
+        payload: {
+          name: 'Test Schema',
+          content: '# Test',
+        },
+      });
+      expect(schemaResponse.statusCode).toBe(201);
+
       const response = await app.inject({
         method: 'POST',
         url: '/api/documents',
         payload: {
           name: 'Test Document',
-          content: 'This is test content',
+          content: '# Test',
           author: testUser._id.toString(),
           tags: [testTag1._id.toString()],
+          schemaId: JSON.parse(schemaResponse.body)._id,
         },
       });
+
+      if (response.statusCode !== 201) {
+        console.log('Response body:', response.body);
+      }
 
       expect(response.statusCode).toBe(201);
       const body = JSON.parse(response.body);
       expect(body).toMatchObject({
         name: 'Test Document',
-        content: 'This is test content',
+        content: '# Test',
         author: testUser._id.toString(),
       });
       expect(body.tags).toEqual([testTag1._id.toString()]);
@@ -66,8 +90,9 @@ describe('Documents API', () => {
         url: '/api/documents',
         payload: {
           name: 'Test Document',
-          content: 'This is test content',
+          content: '# Test',
           author: testUser._id.toString(),
+          schemaId: testSchema._id.toString(),
         },
       });
 
@@ -75,7 +100,7 @@ describe('Documents API', () => {
       const body = JSON.parse(response.body);
       expect(body).toMatchObject({
         name: 'Test Document',
-        content: 'This is test content',
+        content: '# Test',
         author: testUser._id.toString(),
       });
       expect(body.tags).toEqual([]);
@@ -103,11 +128,13 @@ describe('Documents API', () => {
         name: 'Doc 1',
         content: 'Content 1',
         author: testUser._id,
+        schemaId: testSchema._id,
       });
       await Document.create({
         name: 'Doc 2',
         content: 'Content 2',
         author: testUser._id,
+        schemaId: testSchema._id,
       });
 
       const response = await app.inject({
@@ -140,6 +167,7 @@ describe('Documents API', () => {
         name: 'Test Doc',
         content: 'Test Content',
         author: testUser._id,
+        schemaId: testSchema._id,
       });
 
       const response = await app.inject({
@@ -175,6 +203,7 @@ describe('Documents API', () => {
         name: 'Original Name',
         content: 'Original Content',
         author: testUser._id,
+        schemaId: testSchema._id,
       });
 
       const response = await app.inject({
@@ -200,6 +229,7 @@ describe('Documents API', () => {
         name: 'Original Name',
         content: 'Original Content',
         author: testUser._id,
+        schemaId: testSchema._id,
       });
 
       const response = await app.inject({
@@ -241,6 +271,7 @@ describe('Documents API', () => {
         name: 'Test Doc',
         content: 'Test Content',
         author: testUser._id,
+        schemaId: testSchema._id,
       });
 
       const response = await app.inject({

@@ -6,15 +6,18 @@ const c = initContract();
 const schemaSchema = z.object({
   _id: z.string(),
   name: z.string(),
+  schema: z.string(),
   createdAt: z.string(),
 });
 
 const createSchemaSchema = z.object({
   name: z.string(),
+  content: z.string(),
 });
 
 const updateSchemaSchema = z.object({
   name: z.string().optional(),
+  content: z.string().optional(),
 });
 
 export const schemasContract = c.router({

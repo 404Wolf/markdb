@@ -14,6 +14,7 @@ const documentSchema = z.object({
 
 const createDocumentSchema = z.object({
   name: z.string(),
+  schemaId: z.string(),
   content: z.string(),
   author: z.string(),
   tags: z.array(z.string()).optional(),
@@ -47,8 +48,14 @@ export const documentsContract = c.router({
     method: 'POST',
     path: '/api/documents',
     responses: {
-      201: documentSchema,
-      400: z.object({ error: z.string() }),
+      201: z.union([documentSchema, z.object({
+        validationResult: z.discriminatedUnion("success", [
+          z.object({ success: z.literal(true), output: z.string() }),
+          z.object({ success: z.literal(false), error: z.string() })
+        ])
+      })]),
+      404: z.object({ error: z.string() }),
+      422: z.object({ reason: z.literal("validationError"), error: z.string() })
     },
     body: createDocumentSchema,
     summary: 'Create a new document',

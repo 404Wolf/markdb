@@ -1,8 +1,6 @@
-import { initServer } from '@ts-rest/fastify';
 import { schemasContract } from '../contracts/schemas';
 import { Schema } from '../db';
-
-const s = initServer();
+import { s } from "../tsrest"
 
 export const schemasRouter = s.router(schemasContract, {
   getAll: async () => {
@@ -12,6 +10,7 @@ export const schemasRouter = s.router(schemasContract, {
       body: schemas.map(schema => ({
         _id: schema._id.toString(),
         name: schema.name,
+        schema: schema.content,
         createdAt: schema.createdAt.toISOString(),
       })),
     };
@@ -32,6 +31,7 @@ export const schemasRouter = s.router(schemasContract, {
       body: {
         _id: schema._id.toString(),
         name: schema.name,
+        schema: schema.content,
         createdAt: schema.createdAt.toISOString(),
       },
     };
@@ -45,6 +45,7 @@ export const schemasRouter = s.router(schemasContract, {
         body: {
           _id: schema._id.toString(),
           name: schema.name,
+          schema: schema.content,
           createdAt: schema.createdAt.toISOString(),
         },
       };
@@ -74,6 +75,7 @@ export const schemasRouter = s.router(schemasContract, {
         body: {
           _id: schema._id.toString(),
           name: schema.name,
+          schema: schema.content,
           createdAt: schema.createdAt.toISOString(),
         },
       };

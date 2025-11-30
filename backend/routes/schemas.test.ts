@@ -30,6 +30,7 @@ describe('Schemas API', () => {
         url: '/api/schemas',
         payload: {
           name: 'Test Schema',
+          content: '# Test',
         },
       });
 
@@ -37,6 +38,7 @@ describe('Schemas API', () => {
       const body = JSON.parse(response.body);
       expect(body).toMatchObject({
         name: 'Test Schema',
+        schema: '# Test',
       });
       expect(body._id).toBeDefined();
       expect(body.createdAt).toBeDefined();
@@ -56,8 +58,8 @@ describe('Schemas API', () => {
 
   describe('GET /api/schemas', () => {
     it('should return all schemas', async () => {
-      await Schema.create({ name: 'Schema 1' });
-      await Schema.create({ name: 'Schema 2' });
+      await Schema.create({ name: 'Schema 1', content: '# Schema 1' });
+      await Schema.create({ name: 'Schema 2', content: '# Schema 2' });
 
       const response = await app.inject({
         method: 'GET',
@@ -85,7 +87,7 @@ describe('Schemas API', () => {
 
   describe('GET /api/schemas/:id', () => {
     it('should return a schema by id', async () => {
-      const schema = await Schema.create({ name: 'Test Schema' });
+      const schema = await Schema.create({ name: 'Test Schema', content: '# Test' });
 
       const response = await app.inject({
         method: 'GET',
@@ -115,7 +117,7 @@ describe('Schemas API', () => {
 
   describe('PUT /api/schemas/:id', () => {
     it('should update a schema', async () => {
-      const schema = await Schema.create({ name: 'Original Name' });
+      const schema = await Schema.create({ name: 'Original Name', content: '# Original' });
 
       const response = await app.inject({
         method: 'PUT',
@@ -151,7 +153,7 @@ describe('Schemas API', () => {
 
   describe('DELETE /api/schemas/:id', () => {
     it('should delete a schema', async () => {
-      const schema = await Schema.create({ name: 'Test Schema' });
+      const schema = await Schema.create({ name: 'Test Schema', content: '# Test' });
 
       const response = await app.inject({
         method: 'DELETE',

@@ -1,8 +1,8 @@
-import { initServer } from '@ts-rest/fastify';
 import { documentsContract } from '../contracts/documents';
-import { Document } from '../db';
-
-const s = initServer();
+import { Document, Schema } from '../db';
+import { validate } from '../lib/validate';
+import { Extracted } from '../db/schemas/Extracted';
+import { s } from "../tsrest"
 
 export const documentsRouter = s.router(documentsContract, {
   getAll: async () => {
@@ -45,7 +45,27 @@ export const documentsRouter = s.router(documentsContract, {
 
   create: async ({ body }) => {
     try {
+      const schemaDoc = await Schema.findById(body.schemaId);
+
+      if (!schemaDoc) {
+        return {
+          status: 404,
+          body: { error: 'Schema not found' },
+        };
+      }
+
+      const validateResult = await validate({ input: body.content, schema: schemaDoc.content.toString() });
+
+      if (!validateResult.success) {
+        return {
+          status: 422,
+          body: { reason: "validationError", error: validateResult.error },
+        };
+      }
+
       const document = await Document.create(body);
+      await Extracted.create({ forDocument: document._id, data: validateResult.output });
+
       return {
         status: 201,
         body: {
@@ -55,6 +75,7 @@ export const documentsRouter = s.router(documentsContract, {
           author: document.author.toString(),
           tags: document.tags.map(tag => tag.toString()),
           createdAt: document.createdAt.toISOString(),
+          validationResult: validateResult,
         },
       };
     } catch (error) {

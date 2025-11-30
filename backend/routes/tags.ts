@@ -1,8 +1,6 @@
-import { initServer } from '@ts-rest/fastify';
 import { tagsContract } from '../contracts/tags';
 import { Tag } from '../db';
-
-const s = initServer();
+import { s } from "../tsrest"
 
 export const tagsRouter = s.router(tagsContract, {
   getAll: async () => {

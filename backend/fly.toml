@@ -10,7 +10,7 @@ primary_region = 'ord'
   dockerfile = '../Dockerfile'
 
 [processes]
-  app = "bun backend/app.ts"
+  app = "bun backend/server.ts"
 
 [env]
   NODE_ENV = 'production'
