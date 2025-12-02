@@ -17,7 +17,7 @@ export const tagDocumentCommand = buildCommand({
       }
 
       const currentTags = new Set(getResponse.body.tags);
-      
+
       // Add new tags
       if (flags.add) {
         for (const tag of flags.add) {
@@ -63,12 +63,14 @@ export const tagDocumentCommand = buildCommand({
         parse: String,
         brief: "Add tags to the document",
         variadic: true,
+        optional: true,
       },
       remove: {
         kind: "parsed",
         parse: String,
         brief: "Remove tags from the document",
         variadic: true,
+        optional: true,
       },
     },
     positional: {
