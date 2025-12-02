@@ -1,4 +1,4 @@
-FROM rust:1.75-slim as rust-builder
+FROM rust:1.83-slim as rust-builder
 RUN apt-get update && apt-get install -y git build-essential && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/404wolf/mdvalidate.git /tmp/mdvalidate
 WORKDIR /tmp/mdvalidate

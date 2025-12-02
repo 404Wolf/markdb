@@ -137,17 +137,24 @@ export const documentsRouter = s.router(documentsContract, {
       // Update the document
       const updatedDocument = await Document.findByIdAndUpdate(id, body, { new: true });
 
-      const extracted = await Extracted.findOne({ forDocument: updatedDocument!._id });
+      if (!updatedDocument) {
+        return {
+          status: 404,
+          body: { error: 'Document not found' },
+        };
+      }
+
+      const extracted = await Extracted.findOne({ forDocument: updatedDocument._id });
 
       return {
         status: 200,
         body: {
-          _id: updatedDocument!._id.toString(),
-          name: updatedDocument!.name,
-          content: updatedDocument!.content,
-          author: updatedDocument!.author.toString(),
-          tags: updatedDocument!.tags.map(tag => tag.toString()),
-          createdAt: updatedDocument!.createdAt.toISOString(),
+          _id: updatedDocument._id.toString(),
+          name: updatedDocument.name,
+          content: updatedDocument.content,
+          author: updatedDocument.author.toString(),
+          tags: updatedDocument.tags.map(tag => tag.toString()),
+          createdAt: updatedDocument.createdAt.toISOString(),
           extracted: extracted?.data,
         },
       };
