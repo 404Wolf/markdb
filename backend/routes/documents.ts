@@ -7,6 +7,10 @@ import { s } from "../tsrest"
 export const documentsRouter = s.router(documentsContract, {
   getAll: async () => {
     const documents = await Document.find();
+    const documentIds = documents.map(doc => doc._id);
+    const extracted = await Extracted.find({ forDocument: { $in: documentIds } });
+    const extractedMap = new Map(extracted.map(e => [e.forDocument.toString(), e.data]));
+
     return {
       status: 200,
       body: documents.map(doc => ({
@@ -16,6 +20,7 @@ export const documentsRouter = s.router(documentsContract, {
         author: doc.author.toString(),
         tags: doc.tags.map(tag => tag.toString()),
         createdAt: doc.createdAt.toISOString(),
+        extracted: extractedMap.get(doc._id.toString()),
       })),
     };
   },
@@ -30,6 +35,8 @@ export const documentsRouter = s.router(documentsContract, {
       };
     }
 
+    const extracted = await Extracted.findOne({ forDocument: document._id });
+
     return {
       status: 200,
       body: {
@@ -39,6 +46,7 @@ export const documentsRouter = s.router(documentsContract, {
         author: document.author.toString(),
         tags: document.tags.map(tag => tag.toString()),
         createdAt: document.createdAt.toISOString(),
+        extracted: extracted?.data,
       },
     };
   },
@@ -64,7 +72,7 @@ export const documentsRouter = s.router(documentsContract, {
       }
 
       const document = await Document.create(body);
-      await Extracted.create({ forDocument: document._id, data: validateResult.output });
+      const extractedDoc = await Extracted.create({ forDocument: document._id, data: validateResult.output });
 
       return {
         status: 201,
@@ -75,6 +83,7 @@ export const documentsRouter = s.router(documentsContract, {
           author: document.author.toString(),
           tags: document.tags.map(tag => tag.toString()),
           createdAt: document.createdAt.toISOString(),
+          extracted: extractedDoc.data,
           validationResult: validateResult,
         },
       };
@@ -88,7 +97,7 @@ export const documentsRouter = s.router(documentsContract, {
 
   update: async ({ params: { id }, body }) => {
     try {
-      const document = await Document.findByIdAndUpdate(id, body, { new: true });
+      const document = await Document.findById(id);
 
       if (!document) {
         return {
@@ -97,15 +106,49 @@ export const documentsRouter = s.router(documentsContract, {
         };
       }
 
+      // If content is being updated, validate it against the schema
+      if (body.content) {
+        const schemaDoc = await Schema.findById(document.schemaId);
+
+        if (!schemaDoc) {
+          return {
+            status: 404,
+            body: { error: 'Schema not found' },
+          };
+        }
+
+        const validateResult = await validate({ input: body.content, schema: schemaDoc.content.toString() });
+
+        if (!validateResult.success) {
+          return {
+            status: 422,
+            body: { reason: "validationError", error: validateResult.error },
+          };
+        }
+
+        // Update the extracted data if validation succeeds
+        await Extracted.findOneAndUpdate(
+          { forDocument: document._id },
+          { data: validateResult.output },
+          { upsert: true }
+        );
+      }
+
+      // Update the document
+      const updatedDocument = await Document.findByIdAndUpdate(id, body, { new: true });
+
+      const extracted = await Extracted.findOne({ forDocument: updatedDocument!._id });
+
       return {
         status: 200,
         body: {
-          _id: document._id.toString(),
-          name: document.name,
-          content: document.content,
-          author: document.author.toString(),
-          tags: document.tags.map(tag => tag.toString()),
-          createdAt: document.createdAt.toISOString(),
+          _id: updatedDocument!._id.toString(),
+          name: updatedDocument!.name,
+          content: updatedDocument!.content,
+          author: updatedDocument!.author.toString(),
+          tags: updatedDocument!.tags.map(tag => tag.toString()),
+          createdAt: updatedDocument!.createdAt.toISOString(),
+          extracted: extracted?.data,
         },
       };
     } catch (error) {

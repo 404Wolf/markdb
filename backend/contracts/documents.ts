@@ -10,6 +10,7 @@ const documentSchema = z.object({
   author: z.string(),
   tags: z.array(z.string()),
   createdAt: z.string(),
+  extracted: z.any().optional(),
 });
 
 const createDocumentSchema = z.object({
@@ -67,6 +68,7 @@ export const documentsContract = c.router({
       200: documentSchema,
       404: z.object({ error: z.string() }),
       400: z.object({ error: z.string() }),
+      422: z.object({ reason: z.literal("validationError"), error: z.string() })
     },
     body: updateDocumentSchema,
     summary: 'Update a document',

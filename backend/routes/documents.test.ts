@@ -82,6 +82,7 @@ describe('Documents API', () => {
       expect(body.tags).toEqual([testTag1._id.toString()]);
       expect(body._id).toBeDefined();
       expect(body.createdAt).toBeDefined();
+      expect(body.extracted).toBeDefined();
     });
 
     it('should create a document without tags', async () => {
@@ -106,6 +107,7 @@ describe('Documents API', () => {
       expect(body.tags).toEqual([]);
       expect(body._id).toBeDefined();
       expect(body.createdAt).toBeDefined();
+      expect(body.extracted).toBeDefined();
     });
 
     it('should return 400 for missing required fields', async () => {
@@ -201,7 +203,7 @@ describe('Documents API', () => {
     it('should update a document', async () => {
       const document = await Document.create({
         name: 'Original Name',
-        content: 'Original Content',
+        content: '# Test',
         author: testUser._id,
         schemaId: testSchema._id,
       });
@@ -211,7 +213,6 @@ describe('Documents API', () => {
         url: `/api/documents/${document._id}`,
         payload: {
           name: 'Updated Name',
-          content: 'Updated Content',
         },
       });
 
@@ -220,14 +221,14 @@ describe('Documents API', () => {
       expect(body).toMatchObject({
         _id: document._id.toString(),
         name: 'Updated Name',
-        content: 'Updated Content',
+        content: '# Test',
       });
     });
 
     it('should update only specified fields', async () => {
       const document = await Document.create({
         name: 'Original Name',
-        content: 'Original Content',
+        content: '# Test',
         author: testUser._id,
         schemaId: testSchema._id,
       });
@@ -245,7 +246,7 @@ describe('Documents API', () => {
       expect(body).toMatchObject({
         _id: document._id.toString(),
         name: 'Updated Name',
-        content: 'Original Content',
+        content: '# Test',
       });
     });
 
