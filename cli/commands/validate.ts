@@ -1,26 +1,14 @@
 import { buildCommand, type CommandContext } from "@stricli/core";
+import chalk from "chalk";
 import * as fs from "node:fs/promises";
 import { client } from "../client";
+import { InputData } from "../lib/InputData";
 
 export const validateCommand = buildCommand({
-  async func(this: CommandContext, _: {}, schemaPath: string, inputPath: string) {
-    let inputStr: string;
-    if (inputPath === '-') {
-      inputStr = await new Promise<string>((resolve, reject) => {
-        let data = '';
-        process.stdin.setEncoding('utf8');
-        process.stdin.on('data', (chunk) => {
-          data += chunk;
-        });
-        process.stdin.on('end', () => {
-          resolve(data);
-        });
-        process.stdin.on('error', reject);
-      });
-    } else {
-      inputStr = await fs.readFile(inputPath, "utf8");
-    }
+  async func(this: CommandContext, _: Record<string, never>, schemaPath: string, inputPath: string) {
+    const inputData = new InputData(inputPath);
 
+    const inputStr = await inputData.read();
     const schemaStr = await fs.readFile(schemaPath, "utf8");
 
     try {
@@ -31,24 +19,26 @@ export const validateCommand = buildCommand({
         },
       });
 
-      console.error(`Response status: ${response.status}`);
-      console.error(`Response body:`, response.body);
+      console.error(chalk.dim(`Response status: ${response.status}`));
 
       if (response.status === 200) {
+        console.log(chalk.green('Validation successful'));
         console.log(JSON.stringify(response.body.output, null, 2));
       } else if (response.status === 400) {
-        console.error(`Error: ${response.body.error}`);
+        console.error(chalk.red('Validation failed'));
+        console.error(chalk.red(`Error: ${response.body.error}`));
         process.exit(1);
       } else {
-        console.error(`Unexpected error: ${response.status}`);
+        console.error(chalk.red(`Unexpected error: ${response.status}`));
         process.exit(1);
       }
     } catch (error) {
-      console.error('Request failed:', error);
+      console.error(chalk.red('Request failed:'), error);
       process.exit(1);
     }
   },
   parameters: {
+    flags: {},
     positional: {
       kind: "tuple",
       parameters: [

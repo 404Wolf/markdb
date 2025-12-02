@@ -10,4 +10,4 @@ COPY --from=rust-builder /tmp/mdvalidate/target/release/mdv /usr/local/bin/mdv
 COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 EXPOSE 5000
-CMD ["bun", "--hot", "backend/app.ts"]
+CMD ["bun", "--hot", "backend/server.ts"]
