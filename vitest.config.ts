@@ -4,11 +4,13 @@ export default defineConfig({
   test: {
     globals: true,
     fileParallelism: false,
-    pool: 'threads',
+    pool: 'forks',
     poolOptions: {
-      threads: {
-        singleThread: true,
+      forks: {
+        singleFork: true,
       },
     },
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 });

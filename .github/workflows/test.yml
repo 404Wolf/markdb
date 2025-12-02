@@ -1,0 +1,40 @@
+name: Tests
+
+on:
+  push:
+    branches: ['*']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            download-buffer-size = 134217728
+
+      - name: Start MongoDB
+        run: |
+          docker compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml ps
+
+      - name: Wait for MongoDB to be ready
+        run: |
+          timeout 60 bash -c 'until docker compose -f docker-compose.test.yml exec -T mongodb mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done'
+
+      - name: Run tests in Nix shell
+        env:
+          MONGODB_USERNAME: admin
+          MONGODB_PASSWORD: password
+          ADMIN_PASSWORD: test_admin_password
+        run: nix develop --command bash -c "bun install && bun test"
+
+      - name: Stop MongoDB
+        if: always()
+        run: docker compose -f docker-compose.test.yml down
