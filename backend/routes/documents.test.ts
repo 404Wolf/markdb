@@ -38,6 +38,7 @@ beforeEach(async () => {
   testUser = await User.create({
     name: 'Test User',
     email: 'test@example.com',
+    password: 'password123',
   });
   testTag1 = await Tag.create({ name: 'JavaScript' });
   testSchema = await Schema.create({ name: 'Test Schema', content: '# Test' });

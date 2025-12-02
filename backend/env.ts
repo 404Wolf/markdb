@@ -16,6 +16,9 @@ export const env = envsafe({
   MONGO_ROOT_URL: url({
     devDefault: "mongodb://localhost:27017",
   }),
+  ADMIN_PASSWORD: str({
+    devDefault: "admin123",
+  }),
 });
 
 export const DATABASE_URL = `${env.MONGO_ROOT_URL.replace('mongodb://', `mongodb://${env.MONGODB_USERNAME}:${env.MONGODB_PASSWORD}@`)}/?appName=${env.APP_NAME}`;

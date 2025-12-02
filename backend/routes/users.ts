@@ -91,4 +91,43 @@ export const usersRouter = s.router(usersContract, {
       body: { message: 'User deleted successfully' },
     };
   },
+
+  login: async ({ body }) => {
+    try {
+      const user = await User.findOne({ email: body.email }).select('+password');
+
+      if (!user) {
+        return {
+          status: 401,
+          body: { error: 'Invalid email or password' },
+        };
+      }
+
+      const isPasswordValid = await user.comparePassword(body.password);
+
+      if (!isPasswordValid) {
+        return {
+          status: 401,
+          body: { error: 'Invalid email or password' },
+        };
+      }
+
+      return {
+        status: 200,
+        body: {
+          _id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt.toISOString(),
+        },
+      };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message || 'Login failed' : 'Login failed';
+
+      return {
+        status: 400,
+        body: { error: message },
+      };
+    }
+  },
 });

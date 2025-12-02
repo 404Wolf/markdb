@@ -13,11 +13,18 @@ const userSchema = z.object({
 const createUserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
+  password: z.string().min(8),
 });
 
 const updateUserSchema = z.object({
   name: z.string().optional(),
   email: z.string().email().optional(),
+  password: z.string().min(8).optional(),
+});
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
 });
 
 export const usersContract = c.router({
@@ -59,5 +66,15 @@ export const usersContract = c.router({
       404: z.object({ error: z.string() }),
     },
     summary: 'Delete a user',
+  },
+  login: {
+    method: 'POST',
+    path: '/api/users/login',
+    responses: {
+      200: userSchema,
+      401: z.object({ error: z.string() }),
+    },
+    body: loginSchema,
+    summary: 'Login with email and password',
   },
 });
