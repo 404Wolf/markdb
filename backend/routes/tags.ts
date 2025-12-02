@@ -46,10 +46,10 @@ export const tagsRouter = s.router(tagsContract, {
           createdAt: tag.createdAt.toISOString(),
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         status: 400,
-        body: { error: error.message || 'Failed to create tag' },
+        body: { error: error instanceof Error ? error.message : 'Failed to create tag' },
       };
     }
   },
@@ -73,10 +73,10 @@ export const tagsRouter = s.router(tagsContract, {
           createdAt: tag.createdAt.toISOString(),
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         status: 400,
-        body: { error: error.message || 'Failed to update tag' },
+        body: { error: error instanceof Error ? error.message : 'Failed to update tag' },
       };
     }
   },
