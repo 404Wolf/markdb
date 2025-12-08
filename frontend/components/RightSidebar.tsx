@@ -38,11 +38,10 @@ export default function RightSidebar() {
           <For each={schemas()}>
             {(schema) => (
               <div
-                class={`flex items-center gap-2 w-full p-2 mt-1 mb-1 rounded text-sm whitespace-nowrap ${
-                  currentSchemaId() === schema._id ? "bg-neutral-700 text-blue-400" : "text-gray-400"
-                }`}
+                class={`flex items-center gap-2 w-full p-2 mt-1 mb-1 rounded text-sm whitespace-nowrap ${currentSchemaId() === schema._id ? "bg-neutral-700 text-blue-400" : "text-gray-400"
+                  }`}
               >
-                <FileCode class="w-4 h-4 flex-shrink-0" />
+                <FileCode class="w-4 h-4 shrink-0" />
                 <span class="truncate">{schema.name}</span>
               </div>
             )}
@@ -50,7 +49,9 @@ export default function RightSidebar() {
         </div>
       </div>
       <div class="p-2 text-white bg-[rgb(23,23,23)] border-l border-neutral-800 w-16">
-        <button class="p-2 items-center h-10 w-10 mt-1 ml-1 rounded-md flex justify-center active:scale-95"
+        <button
+          type="button"
+          class="p-2 items-center h-10 w-10 mt-1 ml-1 rounded-md flex justify-center active:scale-95"
           onClick={() => setOpen(!open())}
         >
           <FileBraces class={open() ? "text-blue-400" : "text-white hover:text-blue-300"} />
