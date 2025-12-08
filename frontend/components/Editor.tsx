@@ -102,41 +102,6 @@ export default function Editor(props: EditorProps) {
     reader.readAsText(file);
   };
 
-  const handleSave = async () => {
-    const name = prompt("Document name:");
-    if (!name) return;
-
-    try {
-      const schemaRes = await clientApi.schemas.create({
-        body: { name: name + "_schema", content: props.schema || "" },
-      });
-
-      if (schemaRes.status !== 201) {
-        alert("Error creating schema");
-        return;
-      }
-
-      const docRes = await clientApi.documents.create({
-        body: {
-          name,
-          schemaId: schemaRes.body._id,
-          content: content(),
-          author: props.userId,
-        },
-      });
-
-      if (docRes.status === 201) {
-        setRefreshTrigger((n) => n + 1);
-        alert("Saved!");
-      } else {
-        const err = docRes.body as { error?: string; reason?: string };
-        alert("Error: " + (err.error || err.reason));
-      }
-    } catch (e) {
-      alert("Error: " + e);
-    }
-  };
-
   const navigate = useNavigate();
 
   const handleDelete = async () => {
@@ -187,7 +152,7 @@ export default function Editor(props: EditorProps) {
 
   return (
     <div class="relative bg-neutral-800 rounded-lg p-4 flex flex-col h-full">
-      <DocumentProperties 
+      <DocumentProperties
         documentId={props.documentId}
         initialName={props.documentName}
         onDelete={() => {
@@ -236,15 +201,6 @@ export default function Editor(props: EditorProps) {
           <Show when={plaintext()} fallback={<Code />}>
             <Eye />
           </Show>
-        </button>
-        <button
-          type="button"
-          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
-          onClick={handleSave}
-          onMouseEnter={() => setHoverText("Save document")}
-          onMouseLeave={() => setHoverText("")}
-        >
-          <Save />
         </button>
         <input
           ref={fileInputRef}

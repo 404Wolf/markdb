@@ -1,6 +1,7 @@
 import { createSignal, onMount } from "solid-js";
 import { clientOnly } from "@solidjs/start";
-import { getOrCreateDemoUser } from "~/lib/utils";
+import { getOrCreateDemoUser, getOrCreateDemoDocumentAndSchema } from "~/lib/utils";
+import { clientApi } from "~/lib/api";
 
 const Editor = clientOnly(() => import("~/components/Editor"));
 const SchemaEditor = clientOnly(() => import("~/components/SchemaEditor"));
@@ -13,10 +14,22 @@ export default function Home() {
   let containerRef: HTMLDivElement | undefined;
 
   const [user, setUser] = createSignal<{ _id: string; email: string; name: string } | null>(null);
+  const [demoData, setDemoData] = createSignal<{
+    documentId: string;
+    documentName: string;
+    documentContent: string;
+    schemaId: string;
+    schemaContent: string;
+  } | null>(null);
 
   onMount(async () => {
     const userData = await getOrCreateDemoUser();
     setUser(userData);
+    
+    const demo = await getOrCreateDemoDocumentAndSchema(userData._id);
+    setDemoData(demo);
+    setMarkdown(demo.documentContent);
+    setSchema(demo.schemaContent);
   });
 
   const handleMouseDown = (e: MouseEvent) => {
@@ -79,7 +92,14 @@ export default function Home() {
     <div class="flex flex-col h-[calc(100vh-2rem)] m-4">
       <div ref={containerRef} class="flex flex-1 gap-0">
         <div style={{ width: `${leftWidth()}%` }}>
-          <Editor onContentChange={handleMarkdownChange} schema={schema()} userId={user()?._id || ""} />
+          <Editor 
+            onContentChange={handleMarkdownChange} 
+            schema={schema()} 
+            userId={user()?._id || ""}
+            initialContent={demoData()?.documentContent}
+            documentId={demoData()?.documentId}
+            documentName={demoData()?.documentName}
+          />
         </div>
 
         <button
@@ -95,7 +115,10 @@ export default function Home() {
         />
 
         <div style={{ width: `${100 - leftWidth()}%` }}>
-          <SchemaEditor onSchemaChange={handleSchemaChange} />
+          <SchemaEditor 
+            onSchemaChange={handleSchemaChange}
+            initialContent={demoData()?.schemaContent}
+          />
         </div>
       </div>
 
