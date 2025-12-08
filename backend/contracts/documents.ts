@@ -6,6 +6,7 @@ const c = initContract();
 const documentSchema = z.object({
   _id: z.string(),
   name: z.string(),
+  schemaId: z.string(),
   content: z.string(),
   author: z.string(),
   tags: z.array(z.string()),

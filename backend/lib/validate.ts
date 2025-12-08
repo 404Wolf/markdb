@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { ExecaError, execa } from "execa";
 
-export const MDV_PATH = "mdv";
+export const MDV_PATH = os.homedir() + "/.cargo/bin/mdv";
 
 export interface ValidateParams {
   input: string;
@@ -40,7 +40,7 @@ export async function validate({
 
     await fs.writeFile(schemaFile, schema, "utf8");
 
-    const result = await execa(MDV_PATH, ["-", schemaFile, "-"], {
+    const result = await execa(MDV_PATH, [schemaFile, "-", "-"], {
       input,
     });
 
