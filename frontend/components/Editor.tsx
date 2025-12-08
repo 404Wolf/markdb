@@ -24,12 +24,14 @@ import { setRefreshTrigger } from "./DocumentSidebar";
 import { clientApi } from "~/lib/api";
 import DocumentProperties from "./DocumentProperties";
 import toast from "solid-toast";
+import { JsonView } from "@ryantipps/solid-json-view";
 
 const Upload = clientOnly(() => import("lucide-solid/icons/upload"));
 const Save = clientOnly(() => import("lucide-solid/icons/folder-check"));
 const Delete = clientOnly(() => import("lucide-solid/icons/trash-2"));
 const Code = clientOnly(() => import("lucide-solid/icons/code"));
 const Eye = clientOnly(() => import("lucide-solid/icons/eye"));
+const FileJson = clientOnly(() => import("lucide-solid/icons/file-json"));
 
 interface EditorProps {
   onContentChange?: (content: string) => void;
@@ -63,6 +65,8 @@ export default function Editor(props: EditorProps) {
   const [plaintext, setPlaintext] = createSignal(false);
   const [content, setContent] = createSignal(props.initialContent ?? DEFAULT_TEXT);
   const [hoverText, setHoverText] = createSignal("");
+  const [showExtracted, setShowExtracted] = createSignal(false);
+  const [extractedData, setExtractedData] = createSignal<any>(null);
 
   createEffect(() => {
     if (props.initialContent !== undefined) {
@@ -106,6 +110,25 @@ export default function Editor(props: EditorProps) {
   };
 
   const navigate = useNavigate();
+
+  const handleViewExtracted = async () => {
+    if (!props.documentId) {
+      toast.error("No document to view extracted data");
+      return;
+    }
+
+    try {
+      const res = await clientApi.documents.getById({ params: { id: props.documentId } });
+      if (res.status === 200 && res.body.extracted) {
+        setExtractedData(res.body.extracted);
+        setShowExtracted(true);
+      } else {
+        toast.error("No extracted data available");
+      }
+    } catch (e) {
+      toast.error(`Error fetching extracted data: ${e}`);
+    }
+  };
 
   const handleSave = async () => {
     if (!props.documentId) {
@@ -262,6 +285,15 @@ export default function Editor(props: EditorProps) {
         </button>
         <button
           type="button"
+          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
+          onClick={handleViewExtracted}
+          onMouseEnter={() => setHoverText("View extracted data")}
+          onMouseLeave={() => setHoverText("")}
+        >
+          <FileJson />
+        </button>
+        <button
+          type="button"
           class={`px-3 py-1 rounded text-sm text-white transition-all ${
             props.isValid === true
               ? "bg-green-600 hover:bg-green-500 active:scale-95"
@@ -292,6 +324,33 @@ export default function Editor(props: EditorProps) {
           <Delete />
         </button>
       </div>
+
+      {/* Extracted Data Modal */}
+      <Show when={showExtracted()}>
+        <div 
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setShowExtracted(false)}
+        >
+          <div 
+            class="bg-neutral-800 rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-semibold text-white">Extracted Data</h2>
+              <button
+                type="button"
+                class="text-gray-400 hover:text-white text-2xl"
+                onClick={() => setShowExtracted(false)}
+              >
+                ×
+              </button>
+            </div>
+            <pre class="text-white font-mono text-sm bg-neutral-900 p-4 rounded overflow-auto">
+              {JSON.stringify(extractedData(), null, 2)}
+            </pre>
+          </div>
+        </div>
+      </Show>
     </div>
   );
 }
