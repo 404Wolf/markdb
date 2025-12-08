@@ -32,6 +32,32 @@ export async function getOrCreateDemoUser() {
   }
 }
 
+export async function getOrCreateBlankSchema() {
+  const blankSchemaContent = " ";
+
+  // Get or create blank schema
+  const schemasResult = await clientApi.schemas.getAll();
+  
+  if (schemasResult.status === 200) {
+    let schema = schemasResult.body.find(s => s.name === "blank_schema");
+    
+    if (schema) {
+      return schema;
+    }
+  }
+  
+  // Create blank schema if it doesn't exist
+  const createResult = await clientApi.schemas.create({
+    body: { name: "blank_schema", content: blankSchemaContent }
+  });
+  
+  if (createResult.status === 201) {
+    return createResult.body;
+  }
+  
+  throw new Error("Failed to create blank schema");
+}
+
 export async function getOrCreateDemoDocumentAndSchema(userId: string) {
   const demoSchemaContent = `# Grocery List
 
