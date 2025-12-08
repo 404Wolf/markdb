@@ -3,6 +3,7 @@ import { clientOnly } from "@solidjs/start";
 import { useNavigate, useParams } from "@solidjs/router";
 import { clientApi } from "~/lib/api";
 import { getOrCreateBlankSchema } from "~/lib/utils";
+import toast from "solid-toast";
 
 const File = clientOnly(() => import("lucide-solid/icons/file"));
 const FileText = clientOnly(() => import("lucide-solid/icons/file-text"));
@@ -20,7 +21,7 @@ interface SidebarProps {
   userId?: string;
 }
 
-export default function Sidebar(props: SidebarProps) {
+export default function DocumentSidebar(props: SidebarProps) {
   const [open, setOpen] = createSignal(false);
   const [documents] = createResource(refreshTrigger, fetchDocuments);
   const [isCreating, setIsCreating] = createSignal(false);
@@ -35,9 +36,9 @@ export default function Sidebar(props: SidebarProps) {
     try {
       // Get or create blank schema
       const blankSchema = await getOrCreateBlankSchema();
-      
+
       if (!blankSchema || !blankSchema._id) {
-        alert("Failed to create blank schema");
+        toast.error("Failed to create blank schema");
         return;
       }
 
@@ -57,12 +58,13 @@ export default function Sidebar(props: SidebarProps) {
         setIsCreating(false);
         setNewDocName("");
         navigate(`/doc/${res.body._id}`);
+        toast.success(`Document "${name}" created successfully`);
       } else if (res.status === 422) {
-        alert("Validation error: Document content doesn't match schema");
+        toast.error("Validation error: Document content doesn't match schema");
       }
     } catch (error) {
       console.error("Error creating document:", error);
-      alert(`Failed to create document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Failed to create document: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

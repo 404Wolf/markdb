@@ -1,4 +1,4 @@
-import { createSignal, createResource, Show } from "solid-js";
+import { createSignal, createResource, Show, createEffect } from "solid-js";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { clientApi } from "~/lib/api";
@@ -77,6 +77,18 @@ export default function DocumentPage() {
     }
   };
 
+  // Revalidate when document or schema changes
+  createEffect(() => {
+    const currentDoc = doc();
+    const currentSchema = schemaContent();
+    
+    if (currentDoc?.content && currentSchema) {
+      setMarkdown(currentDoc.content);
+      setSchema(currentSchema);
+      runValidation(currentDoc.content, currentSchema);
+    }
+  });
+
   const handleMarkdownChange = (content: string) => {
     setMarkdown(content);
     clearTimeout(debounceTimer);
@@ -100,7 +112,8 @@ export default function DocumentPage() {
               initialContent={doc()?.content}
               documentId={doc()?._id}
               documentName={doc()?.name}
-              userId={userId}
+              userId={userId()}
+              isValid={isValid()}
             />
           </div>
 

@@ -3,10 +3,11 @@ import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, createSignal, onMount } from "solid-js";
 import { clientOnly } from "@solidjs/start";
 import { getOrCreateDemoUser } from "~/lib/utils";
+import { Toaster } from "solid-toast";
 import "./app.css";
 
-const Sidebar = clientOnly(() => import("~/components/Sidebar"));
-const RightSidebar = clientOnly(() => import("~/components/RightSidebar"));
+const DocumentSidebar = clientOnly(() => import("~/components/DocumentSidebar"));
+const SchemaSidebar = clientOnly(() => import("~/components/SchemaSidebar"));
 
 export default function App() {
   const [userId, setUserId] = createSignal<string>("");
@@ -20,11 +21,12 @@ export default function App() {
     <Router
       root={props => (
         <div class="flex h-screen bg-[rgb(25,25,25)]">
-          <Sidebar userId={userId()} />
+          <Toaster position="top-right" />
+          <DocumentSidebar userId={userId()} />
           <main class="flex-1 mx-auto text-gray-700">
             <Suspense>{props.children}</Suspense>
           </main>
-          <RightSidebar />
+          <SchemaSidebar />
         </div>
       )}
     >

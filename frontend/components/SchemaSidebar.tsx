@@ -12,7 +12,7 @@ const fetchSchemas = async () => {
   return [];
 };
 
-export default function RightSidebar() {
+export default function SchemaSidebar() {
   const [open, setOpen] = createSignal(false);
   const [schemas] = createResource(fetchSchemas);
   const params = useParams();

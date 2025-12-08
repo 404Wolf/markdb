@@ -20,9 +20,10 @@ import { onMount } from "solid-js";
 import { clientOnly } from "@solidjs/start";
 import { createSignal, createEffect, Show, type Accessor } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { setRefreshTrigger } from "./Sidebar";
+import { setRefreshTrigger } from "./DocumentSidebar";
 import { clientApi } from "~/lib/api";
 import DocumentProperties from "./DocumentProperties";
+import toast from "solid-toast";
 
 const Upload = clientOnly(() => import("lucide-solid/icons/upload"));
 const Save = clientOnly(() => import("lucide-solid/icons/folder-check"));
@@ -37,6 +38,7 @@ interface EditorProps {
   documentId?: string;
   documentName?: string;
   userId: string;
+  isValid?: boolean | null;
 }
 
 function InitializePlugin(props: { content: Accessor<string> }) {
@@ -104,6 +106,35 @@ export default function Editor(props: EditorProps) {
 
   const navigate = useNavigate();
 
+  const handleSave = async () => {
+    if (!props.documentId) {
+      toast.error("No document to save");
+      return;
+    }
+
+    if (props.isValid !== true) {
+      toast.error("Cannot save: Document does not validate against schema");
+      return;
+    }
+
+    try {
+      const res = await clientApi.documents.update({
+        params: { id: props.documentId },
+        body: { content: content() }
+      });
+
+      if (res.status === 200) {
+        toast.success("Document saved successfully!");
+      } else if (res.status === 422) {
+        toast.error("Validation error: Document content doesn't match schema");
+      } else {
+        toast.error("Error saving document");
+      }
+    } catch (e) {
+      toast.error(`Error: ${e}`);
+    }
+  };
+
   const handleDelete = async () => {
     if (!props.documentId) {
       setContent(DEFAULT_TEXT);
@@ -118,11 +149,12 @@ export default function Editor(props: EditorProps) {
       if (res.status === 200) {
         setRefreshTrigger((n) => n + 1);
         navigate("/");
+        toast.success("Document deleted successfully");
       } else {
-        alert("Error deleting document");
+        toast.error("Error deleting document");
       }
     } catch (e) {
-      alert("Error: " + e);
+      toast.error(`Error: ${e}`);
     }
   };
 
@@ -217,6 +249,28 @@ export default function Editor(props: EditorProps) {
           onMouseLeave={() => setHoverText("")}
         >
           <Upload />
+        </button>
+        <button
+          type="button"
+          class={`px-3 py-1 rounded text-sm text-white transition-all ${
+            props.isValid === true
+              ? "bg-green-600 hover:bg-green-500 active:scale-95"
+              : "bg-zinc-700 opacity-50 cursor-not-allowed"
+          }`}
+          onClick={handleSave}
+          disabled={props.isValid !== true}
+          onMouseEnter={() =>
+            setHoverText(
+              props.isValid === true
+                ? "Save document"
+                : props.isValid === false
+                ? "Cannot save: validation failed"
+                : "Cannot save: no validation result"
+            )
+          }
+          onMouseLeave={() => setHoverText("")}
+        >
+          <Save />
         </button>
         <button
           type="button"

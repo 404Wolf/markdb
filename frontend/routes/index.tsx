@@ -99,6 +99,7 @@ export default function Home() {
             initialContent={demoData()?.documentContent}
             documentId={demoData()?.documentId}
             documentName={demoData()?.documentName}
+            isValid={isValid()}
           />
         </div>
 
