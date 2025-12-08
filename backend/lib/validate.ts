@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { ExecaError, execa } from "execa";
 
-export const MDV_PATH = os.homedir() + "/.cargo/bin/mdv";
+export const MDV_PATH = "mdv";
 
 export interface ValidateParams {
   input: string;

@@ -1,13 +1,13 @@
 import { createSignal, createResource, For } from "solid-js";
 import { clientOnly } from "@solidjs/start";
 import { useNavigate, useParams } from "@solidjs/router";
-import { api } from "~/lib/api";
+import { clientApi } from "~/lib/api";
 
 const File = clientOnly(() => import("lucide-solid/icons/file"));
 const FileText = clientOnly(() => import("lucide-solid/icons/file-text"));
 
 const fetchDocuments = async () => {
-  const res = await api.documents.getAll();
+  const res = await clientApi.documents.getAll();
   if (res.status === 200) return res.body;
   return [];
 };

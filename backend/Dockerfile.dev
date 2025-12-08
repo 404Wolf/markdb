@@ -7,6 +7,7 @@ RUN cargo build --release
 FROM oven/bun:1.2.13-slim
 WORKDIR /app
 COPY --from=rust-builder /tmp/mdvalidate/target/release/mdv /usr/local/bin/mdv
+RUN mdv --version || (echo "mdv binary not found or not executable" && exit 1)
 COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 EXPOSE 5000

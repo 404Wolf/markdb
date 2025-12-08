@@ -1,13 +1,13 @@
 import { createSignal, createResource, For } from "solid-js";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { api } from "~/lib/api";
+import { clientApi } from "~/lib/api";
 
 const FileBraces = clientOnly(() => import("lucide-solid/icons/file-braces"));
 const FileCode = clientOnly(() => import("lucide-solid/icons/file-code"));
 
 const fetchSchemas = async () => {
-  const res = await api.schemas.getAll();
+  const res = await clientApi.schemas.getAll();
   if (res.status === 200) return res.body;
   return [];
 };
@@ -19,7 +19,7 @@ export default function RightSidebar() {
 
   const getCurrentSchemaId = async () => {
     if (!params.id) return null;
-    const res = await api.documents.getById({ params: { id: params.id } });
+    const res = await clientApi.documents.getById({ params: { id: params.id } });
     if (res.status === 200) return res.body.schemaId;
     return null;
   };

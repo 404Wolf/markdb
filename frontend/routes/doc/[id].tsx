@@ -1,7 +1,7 @@
 import { createSignal, createResource, Show } from "solid-js";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { api } from "~/lib/api";
+import { clientApi } from "~/lib/api";
 
 const Editor = clientOnly(() => import("~/components/Editor"));
 const SchemaEditor = clientOnly(() => import("~/components/SchemaEditor"));
@@ -17,17 +17,20 @@ export default function DocumentPage() {
   const [doc] = createResource(
     () => params.id,
     async (id) => {
-      const res = await api.documents.getById({ params: { id } });
+      const res = await clientApi.documents.getById({ params: { id } });
       if (res.status === 200) return res.body;
       return null;
     }
   );
 
+  // Get userId from the document's author field
+  const userId = () => doc()?.author || "";
+
   const [schemaContent] = createResource(
     () => doc()?.schemaId,
     async (schemaId) => {
       if (!schemaId) return null;
-      const res = await api.schemas.getById({ params: { id: schemaId } });
+      const res = await clientApi.schemas.getById({ params: { id: schemaId } });
       if (res.status === 200) return res.body.schema;
       return null;
     }
@@ -63,7 +66,7 @@ export default function DocumentPage() {
       return;
     }
     try {
-      const result = await api.validate({ body: { input: md, schema: sch } });
+      const result = await clientApi.validate({ body: { input: md, schema: sch } });
       if (result.status === 200) {
         setIsValid(result.body.success);
       } else {
@@ -96,10 +99,13 @@ export default function DocumentPage() {
               schema={schema()}
               initialContent={doc()?.content}
               documentId={doc()?._id}
+              documentName={doc()?.name}
+              userId={userId}
             />
           </div>
 
-          <div
+          <button
+            type="button"
             onMouseDown={handleMouseDown}
             class={`w-1 mx-2 rounded cursor-col-resize transition-colors duration-300 ${
               isValid() === null

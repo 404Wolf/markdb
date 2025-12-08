@@ -16,13 +16,14 @@ export const listDocumentsCommand = buildCommand({
         }
 
         console.log(chalk.green(`Found ${response.body.length} document(s):\n`));
-        
+
         for (const doc of response.body) {
           console.log(chalk.bold(`${doc.name}`));
           console.log(chalk.dim(`  ID: ${doc._id}`));
           console.log(chalk.dim(`  Author: ${doc.author}`));
           console.log(chalk.dim(`  Tags: ${doc.tags.length > 0 ? doc.tags.join(', ') : 'none'}`));
           console.log(chalk.dim(`  Created: ${new Date(doc.createdAt).toLocaleString()}`));
+          console.log(chalk.dim(`  Extracted: ${JSON.stringify(doc.extracted)}`));
           console.log();
         }
       } else {

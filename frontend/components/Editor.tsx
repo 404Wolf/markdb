@@ -21,7 +21,8 @@ import { clientOnly } from "@solidjs/start";
 import { createSignal, createEffect, Show, type Accessor } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { setRefreshTrigger } from "./Sidebar";
-import { api } from "~/lib/api";
+import { clientApi } from "~/lib/api";
+import DocumentProperties from "./DocumentProperties";
 
 const Upload = clientOnly(() => import("lucide-solid/icons/upload"));
 const Save = clientOnly(() => import("lucide-solid/icons/folder-check"));
@@ -34,6 +35,8 @@ interface EditorProps {
   schema?: string;
   initialContent?: string;
   documentId?: string;
+  documentName?: string;
+  userId: string;
 }
 
 function InitializePlugin(props: { content: Accessor<string> }) {
@@ -104,7 +107,7 @@ export default function Editor(props: EditorProps) {
     if (!name) return;
 
     try {
-      const schemaRes = await api.schemas.create({
+      const schemaRes = await clientApi.schemas.create({
         body: { name: name + "_schema", content: props.schema || "" },
       });
 
@@ -113,12 +116,12 @@ export default function Editor(props: EditorProps) {
         return;
       }
 
-      const docRes = await api.documents.create({
+      const docRes = await clientApi.documents.create({
         body: {
           name,
           schemaId: schemaRes.body._id,
           content: content(),
-          author: "000000000000000000000000",
+          author: props.userId,
         },
       });
 
@@ -146,7 +149,7 @@ export default function Editor(props: EditorProps) {
     if (!confirm("Delete this document?")) return;
 
     try {
-      const res = await api.documents.delete({ params: { id: props.documentId } });
+      const res = await clientApi.documents.delete({ params: { id: props.documentId } });
       if (res.status === 200) {
         setRefreshTrigger((n) => n + 1);
         navigate("/");
@@ -184,6 +187,14 @@ export default function Editor(props: EditorProps) {
 
   return (
     <div class="relative bg-neutral-800 rounded-lg p-4 flex flex-col h-full">
+      <DocumentProperties 
+        documentId={props.documentId}
+        initialName={props.documentName}
+        onDelete={() => {
+          setContent(DEFAULT_TEXT);
+          props.onContentChange?.(DEFAULT_TEXT);
+        }}
+      />
       <div class="text-xs text-gray-500 mb-2">Markdown</div>
 
       <Show
@@ -216,6 +227,7 @@ export default function Editor(props: EditorProps) {
 
       <div class="flex gap-2 mt-4 justify-start">
         <button
+          type="button"
           class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
           onClick={() => setPlaintext(!plaintext())}
           onMouseEnter={() => setHoverText(plaintext() ? "Switch to formatted view" : "Switch to plaintext view")}
@@ -226,6 +238,7 @@ export default function Editor(props: EditorProps) {
           </Show>
         </button>
         <button
+          type="button"
           class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
           onClick={handleSave}
           onMouseEnter={() => setHoverText("Save document")}
@@ -241,6 +254,7 @@ export default function Editor(props: EditorProps) {
           onChange={handleFileChange}
         />
         <button
+          type="button"
           class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
           onClick={handleUpload}
           onMouseEnter={() => setHoverText("Upload document")}
@@ -249,6 +263,7 @@ export default function Editor(props: EditorProps) {
           <Upload />
         </button>
         <button
+          type="button"
           class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
           onClick={handleDelete}
           onMouseEnter={() => setHoverText("Delete document")}

@@ -77,4 +77,13 @@ export const usersContract = c.router({
     body: loginSchema,
     summary: 'Login with email and password',
   },
+  list: {
+    method: 'GET',
+    path: '/api/users',
+    responses: {
+      200: z.array(userSchema),
+      404: z.object({ error: z.string() }),
+    },
+    summary: 'List all users',
+  },
 });

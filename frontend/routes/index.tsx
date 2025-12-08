@@ -1,9 +1,36 @@
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import { clientOnly } from "@solidjs/start";
-import { api } from "~/lib/api";
+import { clientApi } from "~/lib/api";
 
 const Editor = clientOnly(() => import("~/components/Editor"));
 const SchemaEditor = clientOnly(() => import("~/components/SchemaEditor"));
+
+async function getOrCreateUser(credentials: { email: string; name: string; password: string }) {
+  // Try to create user first
+  const createResult = await clientApi.users.create({
+    body: credentials
+  });
+  
+  if (createResult.status === 201) {
+    console.log("User created:", createResult.body);
+    return createResult.body._id;
+  }
+  
+  // If creation fails (user already exists), try to login
+  const loginResult = await clientApi.users.login({
+    body: {
+      email: credentials.email,
+      password: credentials.password
+    }
+  });
+  
+  if (loginResult.status === 200) {
+    console.log("User logged in:", loginResult.body);
+    return loginResult.body._id;
+  }
+  
+  return "";
+}
 
 export default function Home() {
   const [isValid, setIsValid] = createSignal<boolean | null>(null);
@@ -11,6 +38,19 @@ export default function Home() {
   const [schema, setSchema] = createSignal("");
   const [leftWidth, setLeftWidth] = createSignal(50);
   let containerRef: HTMLDivElement | undefined;
+
+  const [userId, setUserId] = createSignal<string>("");
+
+  const placeholderUser = {
+    email: "test@example.com",
+    name: "Test User",
+    password: "password"
+  };
+
+  onMount(async () => {
+    const id = await getOrCreateUser(placeholderUser);
+    setUserId(id);
+  });
 
   const handleMouseDown = (e: MouseEvent) => {
     e.preventDefault();
@@ -42,7 +82,8 @@ export default function Home() {
       return;
     }
     try {
-      const result = await api.validate({ body: { input: md, schema: sch } });
+      const result = await clientApi.validate({ body: { input: md, schema: sch } });
+      console.log(result.body);
       if (result.status === 200) {
         setIsValid(result.body.success);
       } else {
@@ -71,18 +112,19 @@ export default function Home() {
     <div class="flex flex-col h-[calc(100vh-2rem)] m-4">
       <div ref={containerRef} class="flex flex-1 gap-0">
         <div style={{ width: `${leftWidth()}%` }}>
-          <Editor onContentChange={handleMarkdownChange} schema={schema()} />
+          <Editor onContentChange={handleMarkdownChange} schema={schema()} userId={userId()} />
         </div>
 
-        <div
+        <button
+          type="button"
           onMouseDown={handleMouseDown}
-          class={`w-1 mx-2 rounded cursor-col-resize transition-colors duration-300 ${
-            isValid() === null
-              ? "bg-neutral-600"
-              : isValid()
+          class={`w-1 mx-2 rounded cursor-col-resize transition-colors duration-300 ${isValid() === null
+            ? "bg-neutral-600"
+            : isValid()
               ? "bg-green-500"
               : "bg-red-500"
-          }`}
+            }`}
+          aria-label="Resize panels"
         />
 
         <div style={{ width: `${100 - leftWidth()}%` }}>
@@ -90,8 +132,15 @@ export default function Home() {
         </div>
       </div>
 
-      <div class="text-sm text-gray-500 text-center mt-3">
-        <p>markdb v0.0.0</p>
+      <div>
+        <div class="text-sm text-gray-500 text-center mt-3">
+          <p>MarkDB v0.0.0</p>
+        </div>
+        <div class="absolute right-4 bottom-4 text-sm text-gray-500">
+          <div>Email: {placeholderUser.email}</div>
+          <div>Name: {placeholderUser.name}</div>
+          <div>Id: {userId()}</div>
+        </div>
       </div>
     </div>
   );

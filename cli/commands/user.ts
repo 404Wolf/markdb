@@ -6,11 +6,11 @@ import { userStorage } from "../lib/userStorage";
 const loginCommand = buildCommand({
   async func(this: CommandContext, _: Record<string, never>, email: string, password: string) {
     try {
-      const response = await client.users.login({ 
-        body: { 
-          email, 
-          password 
-        } 
+      const response = await client.users.login({
+        body: {
+          email,
+          password
+        }
       });
 
       if (response.status === 200) {
@@ -57,7 +57,7 @@ const getUserCommand = buildCommand({
 
     if (!user) {
       console.log(chalk.yellow('No user set'));
-      console.log(chalk.dim('Use "markdb user set <userId>" to set a user'));
+      console.log(chalk.dim('Use "markdb user login <email> <password>" to login'));
       return;
     }
 

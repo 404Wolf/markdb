@@ -92,6 +92,20 @@ export const usersRouter = s.router(usersContract, {
     };
   },
 
+  list: async () => {
+    const users = await User.find().select('-password');
+
+    return {
+      status: 200,
+      body: users.map(user => ({
+        _id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt.toISOString(),
+      })),
+    };
+  },
+
   login: async ({ body }) => {
     try {
       const user = await User.findOne({ email: body.email }).select('+password');
