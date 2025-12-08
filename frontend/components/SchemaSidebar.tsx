@@ -12,19 +12,22 @@ const fetchSchemas = async () => {
   return [];
 };
 
+// Global signal for schema selection
+export const [selectedSchemaInfo, setSelectedSchemaInfo] = createSignal<{
+  schemaId: string;
+  schemaContent: string;
+} | null>(null);
+
+// Global signal for current schema ID (for highlighting)
+export const [currentSchemaId, setCurrentSchemaId] = createSignal<string>("");
+
 export default function SchemaSidebar() {
   const [open, setOpen] = createSignal(false);
   const [schemas] = createResource(fetchSchemas);
-  const params = useParams();
 
-  const getCurrentSchemaId = async () => {
-    if (!params.id) return null;
-    const res = await clientApi.documents.getById({ params: { id: params.id } });
-    if (res.status === 200) return res.body.schemaId;
-    return null;
+  const handleSchemaClick = (schemaId: string, schemaContent: string) => {
+    setSelectedSchemaInfo({ schemaId, schemaContent });
   };
-
-  const [currentSchemaId] = createResource(() => params.id, getCurrentSchemaId);
 
   return (
     <div class="flex h-full">
@@ -37,13 +40,18 @@ export default function SchemaSidebar() {
         <div class="flex-1 overflow-y-auto">
           <For each={schemas()}>
             {(schema) => (
-              <div
-                class={`flex items-center gap-2 w-full p-2 mt-1 mb-1 rounded text-sm whitespace-nowrap ${currentSchemaId() === schema._id ? "bg-neutral-700 text-blue-400" : "text-gray-400"
-                  }`}
+              <button
+                type="button"
+                class={`flex items-center gap-2 w-full p-2 mt-1 mb-1 rounded text-left text-sm whitespace-nowrap active:scale-95 transition-transform duration-200 ${
+                  currentSchemaId() === schema._id
+                    ? "bg-neutral-700 text-blue-400"
+                    : "text-gray-400 hover:bg-neutral-700 hover:text-blue-400"
+                }`}
+                onClick={() => handleSchemaClick(schema._id, schema.schema)}
               >
                 <FileCode class="w-4 h-4 shrink-0" />
                 <span class="truncate">{schema.name}</span>
-              </div>
+              </button>
             )}
           </For>
         </div>

@@ -100,6 +100,7 @@ export default function Home() {
             documentId={demoData()?.documentId}
             documentName={demoData()?.documentName}
             isValid={isValid()}
+            schemaId={demoData()?.schemaId}
           />
         </div>
 

@@ -39,6 +39,7 @@ interface EditorProps {
   documentName?: string;
   userId: string;
   isValid?: boolean | null;
+  schemaId?: string;
 }
 
 function InitializePlugin(props: { content: Accessor<string> }) {
@@ -118,9 +119,18 @@ export default function Editor(props: EditorProps) {
     }
 
     try {
+      const updateBody: { content: string; schemaId?: string } = {
+        content: content()
+      };
+      
+      // Include schema ID if it's been changed
+      if (props.schemaId) {
+        updateBody.schemaId = props.schemaId;
+      }
+
       const res = await clientApi.documents.update({
         params: { id: props.documentId },
-        body: { content: content() }
+        body: updateBody
       });
 
       if (res.status === 200) {

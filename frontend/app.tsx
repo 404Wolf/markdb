@@ -22,11 +22,15 @@ export default function App() {
       root={props => (
         <div class="flex h-screen bg-[rgb(25,25,25)]">
           <Toaster position="top-right" />
-          <DocumentSidebar userId={userId()} />
+          <Suspense fallback={<div class="w-16" />}>
+            <DocumentSidebar userId={userId()} />
+          </Suspense>
           <main class="flex-1 mx-auto text-gray-700">
             <Suspense>{props.children}</Suspense>
           </main>
-          <SchemaSidebar />
+          <Suspense fallback={<div class="w-16" />}>
+            <SchemaSidebar />
+          </Suspense>
         </div>
       )}
     >
