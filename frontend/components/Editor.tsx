@@ -39,6 +39,7 @@ interface EditorProps {
   initialContent?: string;
   documentId?: string;
   documentName?: string;
+  documentTags?: string[];
   userId: string;
   isValid?: boolean | null;
   schemaId?: string;
@@ -220,6 +221,7 @@ export default function Editor(props: EditorProps) {
       <DocumentProperties
         documentId={props.documentId}
         initialName={props.documentName}
+        initialTags={props.documentTags}
         onDelete={() => {
           setContent(DEFAULT_TEXT);
           props.onContentChange?.(DEFAULT_TEXT);

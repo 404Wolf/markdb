@@ -33,6 +33,9 @@ export const documentsContract = c.router({
   getAll: {
     method: 'GET',
     path: '/api/documents',
+    query: z.object({
+      tagId: z.string().optional(),
+    }).optional(),
     responses: {
       200: z.array(documentSchema),
     },

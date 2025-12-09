@@ -162,6 +162,64 @@ describe('Documents API', () => {
       const body = JSON.parse(response.body);
       expect(body).toEqual([]);
     });
+
+    it('should filter documents by tag', async () => {
+      const testTag2 = await Tag.create({ name: 'TypeScript' });
+
+      await Document.create({
+        name: 'Doc 1',
+        content: 'Content 1',
+        author: testUser._id,
+        schemaId: testSchema._id,
+        tags: [testTag1._id],
+      });
+      await Document.create({
+        name: 'Doc 2',
+        content: 'Content 2',
+        author: testUser._id,
+        schemaId: testSchema._id,
+        tags: [testTag2._id],
+      });
+      await Document.create({
+        name: 'Doc 3',
+        content: 'Content 3',
+        author: testUser._id,
+        schemaId: testSchema._id,
+        tags: [testTag1._id, testTag2._id],
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api/documents?tagId=${testTag1._id}`,
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveLength(2);
+      expect(body[0]).toMatchObject({ name: 'Doc 1' });
+      expect(body[1]).toMatchObject({ name: 'Doc 3' });
+    });
+
+    it('should return empty array when no documents match the tag filter', async () => {
+      const testTag2 = await Tag.create({ name: 'TypeScript' });
+
+      await Document.create({
+        name: 'Doc 1',
+        content: 'Content 1',
+        author: testUser._id,
+        schemaId: testSchema._id,
+        tags: [testTag1._id],
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api/documents?tagId=${testTag2._id}`,
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body).toEqual([]);
+    });
   });
 
   describe('GET /api/documents/:id', () => {

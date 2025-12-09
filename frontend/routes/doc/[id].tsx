@@ -83,7 +83,7 @@ export default function DocumentPage() {
   createEffect(() => {
     const currentDoc = doc();
     const currentSchema = schemaContent();
-    
+
     if (currentDoc?.content && currentSchema) {
       setMarkdown(currentDoc.content);
       setSchema(currentSchema);
@@ -127,9 +127,8 @@ export default function DocumentPage() {
               initialContent={doc()?.content}
               documentId={doc()?._id}
               documentName={doc()?.name}
+              documentTags={doc()?.tags}
               userId={userId()}
-              isValid={isValid()}
-              schemaId={selectedSchemaId()}
             />
           </div>
 

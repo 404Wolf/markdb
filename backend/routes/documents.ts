@@ -5,8 +5,9 @@ import { Extracted } from '../db/schemas/Extracted';
 import { s } from "../tsrest"
 
 export const documentsRouter = s.router(documentsContract, {
-  getAll: async () => {
-    const documents = await Document.find();
+  getAll: async ({ query }) => {
+    const filter = query?.tagId ? { tags: query.tagId } : {};
+    const documents = await Document.find(filter);
     const documentIds = documents.map(doc => doc._id);
     const extracted = await Extracted.find({ forDocument: { $in: documentIds } });
     const extractedMap = new Map(extracted.map(e => [e.forDocument.toString(), e.data]));
