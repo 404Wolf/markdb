@@ -183,26 +183,9 @@ List and describe the queries your system supports in SQL and Relational Algebra
 
 = Implementation
 
-
-
-== System Environment
-
-A more comprehensive account of each of these components may be found in appendix C.
-
-=== Operating System
-
-We provide Docker configuration for cross-platform deployment. For more information, see appendix C.
+For our backend, we used ts-rest, which makes it really easy to write type safe contracts that we can enforce within our frontend typescript code. Markdb uses MongoDB to store both documents and schemas. We implemented our frontend using SolidJS and solid start for routing, with a simple one page webapp design. Our main target system was Linux, but we also support other unix based systems like Mac (Darwin) as well. We provide Docker configuration for cross-platform deployment -- you can run the project locally with `docker compose up` (or use Podman if you prefer).
 
 === DBMS
-
-markdb uses MongoDB to store both documents and schemas.
-
-=== Languages
-
-- Operating System
-- DBMS
-- Programming Languages
-- Frameworks and Libraries
 
 = Team Member Roles and Contributions
 
