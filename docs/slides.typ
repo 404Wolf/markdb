@@ -13,7 +13,7 @@
   title: "Project Title",
   subtitle: [CSDS 341 Database Systems Final Project],
   authors: "Team Member Names",
-  info: [Fall 2025 — Final Project Presentation],
+  info: [Fall 2025 -- Final Project Presentation],
 )
 
 #title-slide[
@@ -22,17 +22,26 @@
 
 // Wolf
 #slide(title: "Project Overview")[
-  - Brief description of your application and its purpose
-  - Problem statement or motivation
-  - Target users or use case
-  - Why this project matters
+  = MarkDB is a markdown-first database system.
+
+  With MarkDB you can input unstructured input text data, and then apply a schema to enforce a shape on top of the data.
+]
+
+#slide(title: "Use Cases")[
+  = Some example use cases include:
+
+  - Using LLM output as structured data
+  - Extracting data from large collections of Markdown input data
+  - A WASIWIG data entry system in Markdown
 ]
 
 // Wolf
-#slide(title: "Existing Solutions")[
-  - Overview of existing applications or approaches
-  - Limitations of current solutions
-  - How your project improves upon or differs from existing work
+#slide(title: "Prior Art")[
+  = There's a lot of companies that try to make unstructured data useful, particularly for LLMs/vector use cases.
+
+  - Companies like Parseur & Unstructured.io
+  - NLP libraries and techniques (e.g. Apache OpenNLP)
+  - JSON-schema for enforcing structure on unstructured JSON blob data
 ]
 
 // Nick
