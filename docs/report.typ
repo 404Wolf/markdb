@@ -16,12 +16,11 @@
 
 #set heading(numbering: "1.1")
 
-// Title Page
 #align(center)[
   #v(2cm)
 
   #text(size: 24pt, weight: "bold")[
-    Project Title
+    MarkDB
   ]
 
   #v(1cm)
@@ -41,9 +40,8 @@
   #text(size: 12pt)[
     Team Members:
 
-    Name 1
-
-    Name 2
+    Name 1 Wolf Mermelstein
+    Name 2: Nick Mahdavi
      ]
 
   #v(2cm)
@@ -64,6 +62,8 @@
 
 = Application Background
 
+// Wolf
+
 Provide well-detailed background information including:
 
 - Overview of the application domain
@@ -77,12 +77,14 @@ Provide well-detailed background information including:
 
 == Overview
 
+// Nick
 Describe the data your database manages.
 
 == Constraints
 
 List all constraints that need to be enforced:
 
+// Wolf
 - Domain constraints
 - Key constraints
 - Entity integrity constraints
@@ -91,29 +93,36 @@ List all constraints that need to be enforced:
 
 = ER Diagram Design (Optional - Extra Credit)
 
+// Nick
 Include your ER diagram here with all entities, attributes, relationships, and their properties.
+// #figure(image("./path"), caption: [])
 
 = Functional Dependencies
 
 List all functional dependencies derived from the semantics of your data.
 
 == Minimal Cover
+
 Provide the minimal set of functional dependencies for each relation.
 
 = Database Schema
 
+// Wolf
 Present your database schema satisfying 3NF (or BCNF).
 
 == Normalization Analysis
 
+// Wolf
 Explain why each relation is in 3NF or BCNF.
 
 = Example Queries
 
+// Nick
 List and describe the queries your system supports in SQL and Relational Algebra.
 
 = Implementation
 
+// Nick
 == System Environment
 
 - Operating System
@@ -125,14 +134,18 @@ List and describe the queries your system supports in SQL and Relational Algebra
 
 == Team Member 1: Name
 
+// Nick
 *Role*:
 
+// Nick
 *Contributions*:
 
+// Nick
 *What I Learned*:
 
 = Lessons Learned
 
+// Nick
 What the team learned beyond the course material.
 
 = Conclusion
@@ -141,18 +154,24 @@ Project summary and achievements.
 
 #pagebreak()
 
+// Nick
 = Appendix A: Installation Manual
 
 Installation steps and prerequisites.
 
+// Nick
 = Appendix B: User Manual
 
 How to use the application.
 
+// Nick
 = Appendix C: Programmer's Manual
 
 Code documentation and architecture.
 
+// Nick
 = Appendix D: Sample Data and Output
 
+// Nick
+// (use typst grid)
 Screenshots and sample data.

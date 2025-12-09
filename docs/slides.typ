@@ -20,6 +20,7 @@
   Background
 ]
 
+// Wolf
 #slide(title: "Project Overview")[
   - Brief description of your application and its purpose
   - Problem statement or motivation
@@ -27,16 +28,19 @@
   - Why this project matters
 ]
 
+// Wolf
 #slide(title: "Existing Solutions")[
   - Overview of existing applications or approaches
   - Limitations of current solutions
   - How your project improves upon or differs from existing work
 ]
 
+// Nick
 #title-slide[
   Project Functionalities
 ]
 
+// Nick
 #slide(title: "Core Features")[
   - Feature 1: Live automatic validation
   - Feature 2: Description
@@ -44,12 +48,14 @@
   - Feature 4: Description
 ]
 
+// Wolf
 #slide(title: "Database Operations")[
   - Key queries supported
   - CRUD operations implemented
   - Any special database features (triggers, stored procedures, etc.)
 ]
 
+// Nick
 #title-slide[
   Technologies Used
 ]
@@ -86,6 +92,11 @@
 
 #title-slide[
   Questions?
+]
+
+// Nick
+#slide(title: "What we Learned")[
+
 ]
 
 #slide[
