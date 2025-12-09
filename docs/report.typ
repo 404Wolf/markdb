@@ -116,9 +116,9 @@ Describe the data your database manages.
 
 == Constraints
 
-Our database stores users, tags, schemas, documents, and the loose actual extracted data from the documents.
+// Our database stores users, tags, schemas, documents, and the loose actual extracted data from the documents.
 
-Since we use Mongodb for our actual database management system, to enforce schemas we used Mongoose. Mongoose makes it easy to store well structured data in Mongodb.
+Since we use Mongodb for our actual database management system, to enforce schemas we used Mongoose. Mongoose is a typescript library that makes it easy to store well structured data in Mongodb. The actual schemas were as follows
 
 #figure(
 ```ts
@@ -167,9 +167,7 @@ Include your ER diagram here with all entities, attributes, relationships, and t
 
 = Functional Dependencies
 
-The biggest functional dependency in our design is that, given a document and its associated schema's contents joined together, the "Extracted" output can always be determined by actually running the validator. Even though this is true, however, we still store the result in the `extractedSchema` collection, because running this validation is relatively expensive.
-
-== Minimal Cover
+The biggest functional dependency in our design is that, given a document and its associated schema's contents joined together, the "Extracted" output can always be determined by actually running the validator. However, even though this is true we still store the result in the `extractedSchema` collection, because running this validation is relatively expensive.
 
 #figure(
   table(
