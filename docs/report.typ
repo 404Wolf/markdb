@@ -178,8 +178,97 @@ Explain why each relation is in 3NF or BCNF.
 
 = Example Queries
 
-// Nick
-List and describe the queries your system supports in SQL and Relational Algebra.
+== Get all documents with extracted data
+
+SQL:
+```sql
+SELECT d.*, e.data AS extracted
+FROM documents d
+LEFT JOIN extracted e ON d._id = e.forDocument;
+```
+
+Relational Algebra:
+
+$ "Documents" join.l_("forDocument = _id") "Extracted" $
+
+== Get document and extracted data by ID
+
+SQL:
+```sql
+SELECT d.*, e.data AS extracted
+FROM documents d
+LEFT JOIN extracted e ON d._id = e.forDocument
+WHERE d._id = :id;
+```
+
+Relational Algebra:
+$ sigma_("id = id")("Documents" join.l("forDocument = _id") "Extracted") $
+
+== Get all records
+
+SQL:
+```sql
+SELECT * FROM schemas;
+SELECT * FROM tags;
+SELECT _id, name, email, createdAt FROM users;
+```
+
+Relational Algebra:
+$ "Schemas" , quad "Tags" , quad pi_("_id, name, email, createdAt")("Users") $
+
+== Query 4: Get record by ID
+
+SQL:
+```sql
+SELECT * FROM schemas WHERE _id = :id;
+```
+
+Relational Algebra:
+$ sigma_("_id = id")("Schemas") $
+
+== User login
+
+SQL:
+```sql
+SELECT * FROM users WHERE email = :email;
+```
+
+Relational Algebra:
+$ sigma_("email = e")("Users") $
+
+== Batch lookup
+
+SQL:
+```sql
+SELECT * FROM extracted WHERE forDocument IN (:ids);
+```
+
+Relational Algebra:
+$ sigma_("forDocument" in "ids")("Extracted") $
+
+== Update / insert extracted data
+
+SQL:
+```sql
+INSERT INTO extracted (forDocument, data) VALUES (:id, :data)
+ON CONFLICT (forDocument) DO UPDATE SET data = :data;
+```
+
+Relational Algebra: not representable
+
+== Wipe database
+
+SQL:
+```sql
+DELETE FROM users;
+DELETE FROM schemas;
+DELETE FROM documents;
+DELETE FROM tags;
+DELETE FROM extracted;
+```
+
+Relational Algebra:
+$ "Users" <- emptyset, quad "Schemas" <- emptyset, quad "Documents" <- emptyset $
 
 = Implementation
 
@@ -250,3 +339,128 @@ const userSchema = new mongoose.Schema({
 });
 ```, caption: [Our database's schemas, in Mongoose typescript]
 ))
+
+#pagebreak()
+
+#set page(columns: 1)
+
+// Nick
+= Appendix A: Installation Manual
+\
+Clone (required)
+
+```sh
+git clone https://github.com/404wolf/markdb
+cd markdb
+```
+
+Docker (recommended)
+
+```sh
+docker compose up
+```
+
+Nix (dev)
+
+```sh
+nix develop
+docker compose up -d mongodb redis
+bun install
+bun run dev
+```
+
+// Nick
+= Appendix B: User Manual
+
+How to use the application.
+
+// Nick
+= Appendix C: Programmer's Manual
+
+== Architecture Overview
+
+markdb follows a not-quite-three-tier architecture:
+
+#figure(
+  table(
+    columns: 2,
+    align: (left, left),
+    [*Layer*], [*Technology*],
+    [Frontend], [SolidJS + SolidStart + TailwindCSS],
+    [Backend], [Fastify + ts-rest],
+    [Database], [MongoDB + Mongoose ODM],
+    [CLI], [Stricli],
+    [Validation], [mdvalidate],
+  ),
+  caption: [Technology stack by architectural layer]
+)
+
+== Backend API
+
+The backend uses ts-rest for type-safe API contracts. Each resource has a contract defining endpoints and a router implementing handlers.
+
+#figure(
+  table(
+    columns: 3,
+    align: (left, left, left),
+    [*Resource*], [*Endpoints*], [*File*],
+    [Documents], [GET, POST, PUT, DELETE], [`backend/contracts/documents.ts`],
+    [Schemas], [GET, POST, PUT, DELETE], [`backend/contracts/schemas.ts`],
+    [Users], [GET, POST, PUT, DELETE, LOGIN], [`backend/contracts/users.ts`],
+    [Tags], [GET, POST, PUT, DELETE], [`backend/contracts/tags.ts`],
+    [Validate], [POST], [`backend/contracts/validate.ts`],
+    [Admin], [POST (wipe)], [`backend/contracts/admin.ts`],
+  ),
+  caption: [API endpoints by resource]
+)
+
+== Schema Validation
+
+We rely on the `mdvalidate` library to enforce the Markdown validation grammar specified in appendix B. Each document creation or update triggers the following validation process:
+
+1. Client submits document content + schemaId
+2. Backend fetches schema content from database
+3. `validate()` writes schema to temp file, invokes `mdv` binary
+4. If valid: document saved, extracted JSON stored in `Extracted` collection
+5. If invalid: error returned with validation message
+
+== CLI Commands
+
+#figure(
+  table(
+    columns: 2,
+    align: (left, left),
+    [*Command*], [*Description*],
+    [`validate <schema> <input>`], [Validate markdown against schema],
+    [`user login <email> <password>`], [Authenticate and store session],
+    [`user get`], [Show current logged-in user],
+    [`user clear`], [Clear stored session],
+    [`list-schemas`], [List all schemas],
+    [`list-documents`], [List all documents],
+    [`tag-document <id> --add/--remove`], [Manage document tags],
+    [`admin wipe <password>`], [Wipe database (requires],
+  ),
+  caption: [Available CLI commands]
+)
+
+== Database Models
+
+The application consists of five different databases, each of which are mapped to by a different Mongoose model.
+
+- *User data* and authentication with password hasing
+- *Markdown schemas* for validation
+- *Documents* containing Markdown content linked to a schema and author
+- *Tags* for organizing documents (many-to-many with Document)
+- *Extracted* validation output (JSON) per document
+
+== Test suite
+
+```sh
+bun run test
+```
+
+Each route has a corresponding `.test.ts` file testing each CRUD operation.
+
+// Nick
+// (use typst grid)
+Screenshots and sample data.
