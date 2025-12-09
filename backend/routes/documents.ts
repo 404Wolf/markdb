@@ -16,6 +16,7 @@ export const documentsRouter = s.router(documentsContract, {
       body: documents.map(doc => ({
         _id: doc._id.toString(),
         name: doc.name,
+        schemaId: doc.schemaId.toString(),
         content: doc.content,
         author: doc.author.toString(),
         tags: doc.tags.map(tag => tag.toString()),
@@ -42,6 +43,7 @@ export const documentsRouter = s.router(documentsContract, {
       body: {
         _id: document._id.toString(),
         name: document.name,
+        schemaId: document.schemaId.toString(),
         content: document.content,
         author: document.author.toString(),
         tags: document.tags.map(tag => tag.toString()),
@@ -79,6 +81,7 @@ export const documentsRouter = s.router(documentsContract, {
         body: {
           _id: document._id.toString(),
           name: document.name,
+          schemaId: document.schemaId.toString(),
           content: document.content,
           author: document.author.toString(),
           tags: document.tags.map(tag => tag.toString()),
@@ -151,6 +154,7 @@ export const documentsRouter = s.router(documentsContract, {
         body: {
           _id: updatedDocument._id.toString(),
           name: updatedDocument.name,
+          schemaId: updatedDocument.schemaId.toString(),
           content: updatedDocument.content,
           author: updatedDocument.author.toString(),
           tags: updatedDocument.tags.map(tag => tag.toString()),

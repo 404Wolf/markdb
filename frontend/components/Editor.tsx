@@ -1,0 +1,277 @@
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { ListNode, ListItemNode } from "@lexical/list";
+import { CodeNode } from "@lexical/code";
+import { LinkNode } from "@lexical/link";
+import { $convertToMarkdownString, $convertFromMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import {
+  ContentEditable,
+  LexicalComposer,
+  RichTextPlugin,
+  LexicalErrorBoundary,
+  LexicalMarkdownShortcutPlugin,
+  OnChangePlugin,
+  HorizontalRuleNode,
+  ListPlugin,
+  TabIndentationPlugin
+} from "lexical-solid";
+import { type EditorState } from "lexical";
+import { useLexicalComposerContext } from "lexical-solid/LexicalComposerContext";
+import { onMount } from "solid-js";
+import { clientOnly } from "@solidjs/start";
+import { createSignal, createEffect, Show, type Accessor } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import { setRefreshTrigger } from "./Sidebar";
+import { clientApi } from "~/lib/api";
+import DocumentProperties from "./DocumentProperties";
+
+const Upload = clientOnly(() => import("lucide-solid/icons/upload"));
+const Save = clientOnly(() => import("lucide-solid/icons/folder-check"));
+const Delete = clientOnly(() => import("lucide-solid/icons/trash-2"));
+const Code = clientOnly(() => import("lucide-solid/icons/code"));
+const Eye = clientOnly(() => import("lucide-solid/icons/eye"));
+
+interface EditorProps {
+  onContentChange?: (content: string) => void;
+  schema?: string;
+  initialContent?: string;
+  documentId?: string;
+  documentName?: string;
+  userId: string;
+}
+
+function InitializePlugin(props: { content: Accessor<string> }) {
+  const [editor] = useLexicalComposerContext();
+  onMount(() => {
+    editor.update(() => {
+      $convertFromMarkdownString(props.content(), TRANSFORMERS);
+    });
+  });
+  return null;
+}
+
+const DEFAULT_TEXT = `# Grocery List
+
+
+- Apples
+    - organic
+- Blueberries`;
+
+export default function Editor(props: EditorProps) {
+  const [plaintext, setPlaintext] = createSignal(false);
+  const [content, setContent] = createSignal(props.initialContent ?? DEFAULT_TEXT);
+  const [hoverText, setHoverText] = createSignal("");
+
+  createEffect(() => {
+    if (props.initialContent !== undefined) {
+      setContent(props.initialContent);
+      setPlaintext(true);
+    }
+  });
+
+  const handleChange = (editorState: EditorState) => {
+    editorState.read(() => {
+      const markdown = $convertToMarkdownString(TRANSFORMERS);
+      setContent(markdown);
+      props.onContentChange?.(markdown);
+    });
+  };
+
+  const handlePlaintextChange = (e: InputEvent) => {
+    const value = (e.target as HTMLTextAreaElement).value;
+    setContent(value);
+    props.onContentChange?.(value);
+  };
+
+  let fileInputRef: HTMLInputElement | undefined;
+
+  const handleUpload = () => {
+    fileInputRef?.click();
+  };
+
+  const handleFileChange = (e: Event) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      setContent(text);
+      props.onContentChange?.(text);
+      setPlaintext(true);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleSave = async () => {
+    const name = prompt("Document name:");
+    if (!name) return;
+
+    try {
+      const schemaRes = await clientApi.schemas.create({
+        body: { name: name + "_schema", content: props.schema || "" },
+      });
+
+      if (schemaRes.status !== 201) {
+        alert("Error creating schema");
+        return;
+      }
+
+      const docRes = await clientApi.documents.create({
+        body: {
+          name,
+          schemaId: schemaRes.body._id,
+          content: content(),
+          author: props.userId,
+        },
+      });
+
+      if (docRes.status === 201) {
+        setRefreshTrigger((n) => n + 1);
+        alert("Saved!");
+      } else {
+        const err = docRes.body as { error?: string; reason?: string };
+        alert("Error: " + (err.error || err.reason));
+      }
+    } catch (e) {
+      alert("Error: " + e);
+    }
+  };
+
+  const navigate = useNavigate();
+
+  const handleDelete = async () => {
+    if (!props.documentId) {
+      setContent(DEFAULT_TEXT);
+      props.onContentChange?.(DEFAULT_TEXT);
+      return;
+    }
+
+    if (!confirm("Delete this document?")) return;
+
+    try {
+      const res = await clientApi.documents.delete({ params: { id: props.documentId } });
+      if (res.status === 200) {
+        setRefreshTrigger((n) => n + 1);
+        navigate("/");
+      } else {
+        alert("Error deleting document");
+      }
+    } catch (e) {
+      alert("Error: " + e);
+    }
+  };
+
+  const initialConfig = {
+    namespace: "MarkDB",
+    onError: (error: Error) => console.error(error),
+    nodes: [HorizontalRuleNode, HeadingNode, QuoteNode, ListNode, ListItemNode, CodeNode, LinkNode],
+    theme: {
+      heading: {
+        h1: "text-3xl font-bold",
+        h2: "text-2xl font-bold",
+        h3: "text-xl font-bold",
+      },
+      quote: "border-l-4 border-gray-500 pl-4 italic",
+      list: {
+        ul: "ml-6",
+        ol: "list-decimal ml-6",
+        listitem: "list-disc",
+        nested: {
+          listitem: "list-none ml-1",
+        },
+      },
+      code: "bg-zinc-700 px-1 rounded font-mono",
+      link: "text-blue-400 underline",
+    },
+  };
+
+  return (
+    <div class="relative bg-neutral-800 rounded-lg p-4 flex flex-col h-full">
+      <DocumentProperties 
+        documentId={props.documentId}
+        initialName={props.documentName}
+        onDelete={() => {
+          setContent(DEFAULT_TEXT);
+          props.onContentChange?.(DEFAULT_TEXT);
+        }}
+      />
+      <div class="text-xs text-gray-500 mb-2">Markdown</div>
+
+      <Show
+        when={!plaintext()}
+        fallback={
+          <textarea
+            class="flex-1 bg-transparent text-white outline-none font-mono text-sm resize-none"
+            value={content()}
+            onInput={handlePlaintextChange}
+            placeholder="# Start typing markdown..."
+            spellcheck={false}
+          />
+        }
+      >
+        <LexicalComposer initialConfig={initialConfig}>
+          <RichTextPlugin
+            contentEditable={<ContentEditable class="flex-1 overflow-y-auto text-white outline-none" />}
+            placeholder={<div class="absolute top-10 left-4 text-gray-500 pointer-events-none">Start typing...</div>}
+            errorBoundary={LexicalErrorBoundary}
+          />
+          <LexicalMarkdownShortcutPlugin />
+          <ListPlugin />
+          <TabIndentationPlugin />
+          <OnChangePlugin onChange={handleChange} />
+          <InitializePlugin content={content} />
+        </LexicalComposer>
+      </Show>
+
+      <div class="h-5 mt-4 text-xs text-gray-400">{hoverText()}</div>
+
+      <div class="flex gap-2 mt-4 justify-start">
+        <button
+          type="button"
+          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
+          onClick={() => setPlaintext(!plaintext())}
+          onMouseEnter={() => setHoverText(plaintext() ? "Switch to formatted view" : "Switch to plaintext view")}
+          onMouseLeave={() => setHoverText("")}
+        >
+          <Show when={plaintext()} fallback={<Code />}>
+            <Eye />
+          </Show>
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
+          onClick={handleSave}
+          onMouseEnter={() => setHoverText("Save document")}
+          onMouseLeave={() => setHoverText("")}
+        >
+          <Save />
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".md,.markdown,.txt"
+          class="hidden"
+          onChange={handleFileChange}
+        />
+        <button
+          type="button"
+          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
+          onClick={handleUpload}
+          onMouseEnter={() => setHoverText("Upload document")}
+          onMouseLeave={() => setHoverText("")}
+        >
+          <Upload />
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
+          onClick={handleDelete}
+          onMouseEnter={() => setHoverText("Delete document")}
+          onMouseLeave={() => setHoverText("")}
+        >
+          <Delete />
+        </button>
+      </div>
+    </div>
+  );
+}
