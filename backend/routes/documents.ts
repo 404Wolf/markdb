@@ -110,9 +110,13 @@ export const documentsRouter = s.router(documentsContract, {
         };
       }
 
-      // If content is being updated, validate it against the schema
-      if (body.content) {
-        const schemaDoc = await Schema.findById(document.schemaId);
+      // Determine which schema to validate against
+      const targetSchemaId = body.schemaId || document.schemaId;
+      const contentToValidate = body.content || document.content;
+      
+      // If schema or content is being updated, validate the content against the target schema
+      if (body.schemaId || body.content) {
+        const schemaDoc = await Schema.findById(targetSchemaId);
 
         if (!schemaDoc) {
           return {
@@ -121,7 +125,7 @@ export const documentsRouter = s.router(documentsContract, {
           };
         }
 
-        const validateResult = await validate({ input: body.content, schema: schemaDoc.content.toString() });
+        const validateResult = await validate({ input: contentToValidate, schema: schemaDoc.content.toString() });
 
         if (!validateResult.success) {
           return {

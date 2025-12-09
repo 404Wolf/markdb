@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "markdb",
@@ -13,6 +12,7 @@
         "@lexical/markdown": "0.30.0",
         "@lexical/rich-text": "0.30.0",
         "@rollup/rollup-darwin-arm64": "^4.53.3",
+        "@ryantipps/solid-json-view": "^1.0.3",
         "@solidjs/router": "^0.15.4",
         "@solidjs/start": "^1.2.0",
         "@stricli/auto-complete": "^1.2.4",
@@ -30,6 +30,7 @@
         "lucide-solid": "^0.556.0",
         "mongoose": "^8.20.1",
         "solid-js": "^1.9.10",
+        "solid-toast": "^0.5.0",
         "stricli": "^1.1.8",
         "vinxi": "^0.5.8",
         "xdg-app-paths": "8.0.1",
@@ -376,6 +377,10 @@
     "@rollup/rollup-win32-x64-gnu": ["@rollup/rollup-win32-x64-gnu@4.53.3", "", { "os": "win32", "cpu": "x64" }, "sha512-J9QDiOIZlZLdcot5NXEepDkstocktoVjkaKUtqzgzpt2yWjGlbYiKyp05rWwk4nypbYUNoFAztEgixoLaSETkg=="],
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.53.3", "", { "os": "win32", "cpu": "x64" }, "sha512-UhTd8u31dXadv0MopwGgNOBpUVROFKWVQgAg5N1ESyCz8AuBcMqm4AuTjrwgQKGDfoFuz02EuMRHQIw/frmYKQ=="],
+
+    "@ryantipps/json-utils": ["@ryantipps/json-utils@1.0.1", "", {}, "sha512-9u7XLvNi7iBxGrKPAlFb1h+ImnF0NaM/KMKlSB3706Ut/4WXxNAcX1bWHrB0j5JMAzy7sWht5Z4NCHEsqq5a7w=="],
+
+    "@ryantipps/solid-json-view": ["@ryantipps/solid-json-view@1.0.3", "", { "dependencies": { "@ryantipps/json-utils": "1.0.1" }, "peerDependencies": { "solid-js": "^1.9.3" } }, "sha512-t9++KDS/FnrQb4j+5yzH50+7mVWvlRGi8fDWnRR4sik4P/JYpQVpjRzHyEVQ8UzYduzJkOVd0alzHrjUj+HyuA=="],
 
     "@sec-ant/readable-stream": ["@sec-ant/readable-stream@0.4.1", "", {}, "sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg=="],
 
@@ -1238,6 +1243,8 @@
     "solid-js": ["solid-js@1.9.10", "", { "dependencies": { "csstype": "^3.1.0", "seroval": "~1.3.0", "seroval-plugins": "~1.3.0" } }, "sha512-Coz956cos/EPDlhs6+jsdTxKuJDPT7B5SVIWgABwROyxjY7Xbr8wkzD68Et+NxnV7DLJ3nJdAC2r9InuV/4Jew=="],
 
     "solid-refresh": ["solid-refresh@0.6.3", "", { "dependencies": { "@babel/generator": "^7.23.6", "@babel/helper-module-imports": "^7.22.15", "@babel/types": "^7.23.6" }, "peerDependencies": { "solid-js": "^1.3" } }, "sha512-F3aPsX6hVw9ttm5LYlth8Q15x6MlI/J3Dn+o3EQyRTtTxidepSTwAYdozt01/YA+7ObcciagGEyXIopGZzQtbA=="],
+
+    "solid-toast": ["solid-toast@0.5.0", "", { "peerDependencies": { "solid-js": "^1.5.4" } }, "sha512-t770JakjyS2P9b8Qa1zMLOD51KYKWXbTAyJePVUoYex5c5FH5S/HtUBUbZAWFcqRCKmAE8KhyIiCvDZA8bOnxQ=="],
 
     "solid-use": ["solid-use@0.9.1", "", { "peerDependencies": { "solid-js": "^1.7" } }, "sha512-UwvXDVPlrrbj/9ewG9ys5uL2IO4jSiwys2KPzK4zsnAcmEl7iDafZWW1Mo4BSEWOmQCGK6IvpmGHo1aou8iOFw=="],
 

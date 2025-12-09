@@ -1,7 +1,8 @@
-import { createSignal, createResource, Show } from "solid-js";
+import { createSignal, createResource, Show, createEffect } from "solid-js";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { clientApi } from "~/lib/api";
+import { selectedSchemaInfo, setCurrentSchemaId } from "~/components/SchemaSidebar";
 
 const Editor = clientOnly(() => import("~/components/Editor"));
 const SchemaEditor = clientOnly(() => import("~/components/SchemaEditor"));
@@ -11,6 +12,7 @@ export default function DocumentPage() {
   const [isValid, setIsValid] = createSignal<boolean | null>(null);
   const [markdown, setMarkdown] = createSignal("");
   const [schema, setSchema] = createSignal("");
+  const [selectedSchemaId, setSelectedSchemaId] = createSignal<string>("");
   const [leftWidth, setLeftWidth] = createSignal(50);
   let containerRef: HTMLDivElement | undefined;
 
@@ -77,6 +79,31 @@ export default function DocumentPage() {
     }
   };
 
+  // Revalidate when document or schema changes
+  createEffect(() => {
+    const currentDoc = doc();
+    const currentSchema = schemaContent();
+
+    if (currentDoc?.content && currentSchema) {
+      setMarkdown(currentDoc.content);
+      setSchema(currentSchema);
+      setSelectedSchemaId(currentDoc.schemaId);
+      setCurrentSchemaId(currentDoc.schemaId);
+      runValidation(currentDoc.content, currentSchema);
+    }
+  });
+
+  // Listen to schema selection from sidebar
+  createEffect(() => {
+    const schemaInfo = selectedSchemaInfo();
+    if (schemaInfo) {
+      setSelectedSchemaId(schemaInfo.schemaId);
+      setSchema(schemaInfo.schemaContent);
+      setCurrentSchemaId(schemaInfo.schemaId);
+      runValidation(markdown(), schemaInfo.schemaContent);
+    }
+  });
+
   const handleMarkdownChange = (content: string) => {
     setMarkdown(content);
     clearTimeout(debounceTimer);
@@ -101,7 +128,7 @@ export default function DocumentPage() {
               documentId={doc()?._id}
               documentName={doc()?.name}
               documentTags={doc()?.tags}
-              userId={userId}
+              userId={userId()}
             />
           </div>
 
@@ -118,7 +145,7 @@ export default function DocumentPage() {
           />
 
           <div style={{ width: `${100 - leftWidth()}%` }}>
-            <SchemaEditor onSchemaChange={handleSchemaChange} initialContent={schemaContent() ?? undefined} />
+            <SchemaEditor onSchemaChange={handleSchemaChange} initialContent={schema()} />
           </div>
         </div>
       </Show>

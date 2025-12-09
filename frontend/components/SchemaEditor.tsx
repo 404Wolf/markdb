@@ -11,17 +11,13 @@ const DEFAULT_SCHEMA = `# Grocery List
   - \`note:/\\w+/\`+`;
 
 export default function SchemaEditor(props: SchemaEditorProps) {
-  const [content, setContent] = createSignal(props.initialContent ?? DEFAULT_SCHEMA);
+  const [content, setContent] = createSignal(DEFAULT_SCHEMA);
 
   createEffect(() => {
-    if (props.initialContent !== undefined) {
+    if (props.initialContent) {
       setContent(props.initialContent);
       props.onSchemaChange?.(props.initialContent);
     }
-  });
-
-  onMount(() => {
-    props.onSchemaChange?.(content());
   });
 
   const handleInput = (e: InputEvent) => {

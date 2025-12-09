@@ -20,15 +20,18 @@ import { onMount } from "solid-js";
 import { clientOnly } from "@solidjs/start";
 import { createSignal, createEffect, Show, type Accessor } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { setRefreshTrigger } from "./Sidebar";
+import { setRefreshTrigger } from "./DocumentSidebar";
 import { clientApi } from "~/lib/api";
 import DocumentProperties from "./DocumentProperties";
+import toast from "solid-toast";
+import { JsonView } from "@ryantipps/solid-json-view";
 
 const Upload = clientOnly(() => import("lucide-solid/icons/upload"));
 const Save = clientOnly(() => import("lucide-solid/icons/folder-check"));
 const Delete = clientOnly(() => import("lucide-solid/icons/trash-2"));
 const Code = clientOnly(() => import("lucide-solid/icons/code"));
 const Eye = clientOnly(() => import("lucide-solid/icons/eye"));
+const FileJson = clientOnly(() => import("lucide-solid/icons/file-json"));
 
 interface EditorProps {
   onContentChange?: (content: string) => void;
@@ -38,6 +41,8 @@ interface EditorProps {
   documentName?: string;
   documentTags?: string[];
   userId: string;
+  isValid?: boolean | null;
+  schemaId?: string;
 }
 
 function InitializePlugin(props: { content: Accessor<string> }) {
@@ -61,6 +66,8 @@ export default function Editor(props: EditorProps) {
   const [plaintext, setPlaintext] = createSignal(false);
   const [content, setContent] = createSignal(props.initialContent ?? DEFAULT_TEXT);
   const [hoverText, setHoverText] = createSignal("");
+  const [showExtracted, setShowExtracted] = createSignal(false);
+  const [extractedData, setExtractedData] = createSignal<any>(null);
 
   createEffect(() => {
     if (props.initialContent !== undefined) {
@@ -103,42 +110,64 @@ export default function Editor(props: EditorProps) {
     reader.readAsText(file);
   };
 
-  const handleSave = async () => {
-    const name = prompt("Document name:");
-    if (!name) return;
+  const navigate = useNavigate();
+
+  const handleViewExtracted = async () => {
+    if (!props.documentId) {
+      toast.error("No document to view extracted data");
+      return;
+    }
 
     try {
-      const schemaRes = await clientApi.schemas.create({
-        body: { name: name + "_schema", content: props.schema || "" },
-      });
-
-      if (schemaRes.status !== 201) {
-        alert("Error creating schema");
-        return;
-      }
-
-      const docRes = await clientApi.documents.create({
-        body: {
-          name,
-          schemaId: schemaRes.body._id,
-          content: content(),
-          author: props.userId,
-        },
-      });
-
-      if (docRes.status === 201) {
-        setRefreshTrigger((n) => n + 1);
-        alert("Saved!");
+      const res = await clientApi.documents.getById({ params: { id: props.documentId } });
+      if (res.status === 200 && res.body.extracted) {
+        setExtractedData(res.body.extracted);
+        setShowExtracted(true);
       } else {
-        const err = docRes.body as { error?: string; reason?: string };
-        alert("Error: " + (err.error || err.reason));
+        toast.error("No extracted data available");
       }
     } catch (e) {
-      alert("Error: " + e);
+      toast.error(`Error fetching extracted data: ${e}`);
     }
   };
 
-  const navigate = useNavigate();
+  const handleSave = async () => {
+    if (!props.documentId) {
+      toast.error("No document to save");
+      return;
+    }
+
+    if (props.isValid !== true) {
+      toast.error("Cannot save: Document does not validate against schema");
+      return;
+    }
+
+    try {
+      const updateBody: { content: string; schemaId?: string } = {
+        content: content()
+      };
+
+      // Include schema ID if it's been changed
+      if (props.schemaId) {
+        updateBody.schemaId = props.schemaId;
+      }
+
+      const res = await clientApi.documents.update({
+        params: { id: props.documentId },
+        body: updateBody
+      });
+
+      if (res.status === 200) {
+        toast.success("Document saved successfully!");
+      } else if (res.status === 422) {
+        toast.error("Validation error: Document content doesn't match schema");
+      } else {
+        toast.error("Error saving document");
+      }
+    } catch (e) {
+      toast.error(`Error: ${e}`);
+    }
+  };
 
   const handleDelete = async () => {
     if (!props.documentId) {
@@ -154,11 +183,12 @@ export default function Editor(props: EditorProps) {
       if (res.status === 200) {
         setRefreshTrigger((n) => n + 1);
         navigate("/");
+        toast.success("Document deleted successfully");
       } else {
-        alert("Error deleting document");
+        toast.error("Error deleting document");
       }
     } catch (e) {
-      alert("Error: " + e);
+      toast.error(`Error: ${e}`);
     }
   };
 
@@ -188,7 +218,7 @@ export default function Editor(props: EditorProps) {
 
   return (
     <div class="relative bg-neutral-800 rounded-lg p-4 flex flex-col h-full">
-      <DocumentProperties 
+      <DocumentProperties
         documentId={props.documentId}
         initialName={props.documentName}
         initialTags={props.documentTags}
@@ -239,15 +269,6 @@ export default function Editor(props: EditorProps) {
             <Eye />
           </Show>
         </button>
-        <button
-          type="button"
-          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
-          onClick={handleSave}
-          onMouseEnter={() => setHoverText("Save document")}
-          onMouseLeave={() => setHoverText("")}
-        >
-          <Save />
-        </button>
         <input
           ref={fileInputRef}
           type="file"
@@ -267,6 +288,37 @@ export default function Editor(props: EditorProps) {
         <button
           type="button"
           class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
+          onClick={handleViewExtracted}
+          onMouseEnter={() => setHoverText("View extracted data")}
+          onMouseLeave={() => setHoverText("")}
+        >
+          <FileJson />
+        </button>
+        <button
+          type="button"
+          class={`px-3 py-1 rounded text-sm text-white transition-all ${
+            props.isValid === true
+              ? "bg-green-600 hover:bg-green-500 active:scale-95"
+              : "bg-zinc-700 opacity-50 cursor-not-allowed"
+          }`}
+          onClick={handleSave}
+          disabled={props.isValid !== true}
+          onMouseEnter={() =>
+            setHoverText(
+              props.isValid === true
+                ? "Save document"
+                : props.isValid === false
+                ? "Cannot save: validation failed"
+                : "Cannot save: no validation result"
+            )
+          }
+          onMouseLeave={() => setHoverText("")}
+        >
+          <Save />
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded text-sm text-white active:scale-95"
           onClick={handleDelete}
           onMouseEnter={() => setHoverText("Delete document")}
           onMouseLeave={() => setHoverText("")}
@@ -274,6 +326,35 @@ export default function Editor(props: EditorProps) {
           <Delete />
         </button>
       </div>
+
+      {/* Extracted Data Modal */}
+      <Show when={showExtracted()}>
+        <button
+          type="button"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setShowExtracted(false)}
+        >
+          <button
+            type="button"
+            class="bg-neutral-800 rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-semibold text-white">Extracted Data</h2>
+              <button
+                type="button"
+                class="text-gray-400 hover:text-white text-2xl"
+                onClick={() => setShowExtracted(false)}
+              >
+                ×
+              </button>
+            </div>
+            <pre class="text-white font-mono text-sm bg-neutral-900 p-4 rounded overflow-auto">
+              {JSON.stringify(extractedData(), null, 2)}
+            </pre>
+          </button>
+        </button>
+      </Show>
     </div>
   );
 }

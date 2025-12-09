@@ -9,6 +9,7 @@ export default defineConfig({
     resolve: {
       alias: {
         lexical: path.resolve("node_modules/lexical"),
+        "solid-js": path.resolve("node_modules/solid-js"),
       },
     },
   },

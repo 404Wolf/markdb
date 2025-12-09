@@ -2,7 +2,8 @@ import { createSignal, Show, createResource, For } from "solid-js";
 import { clientOnly } from "@solidjs/start";
 import { useNavigate } from "@solidjs/router";
 import { clientApi } from "~/lib/api";
-import { setRefreshTrigger } from "./Sidebar";
+import { setRefreshTrigger } from "./DocumentSidebar";
+import toast from "solid-toast";
 
 const SaveIcon = clientOnly(() => import("lucide-solid/icons/save"));
 const DeleteIcon = clientOnly(() => import("lucide-solid/icons/trash-2"));
@@ -34,13 +35,13 @@ export default function DocumentProperties(props: DocumentPropertiesProps) {
 
   const handleSave = async () => {
     if (!props.documentId) {
-      alert("No document to save");
+      toast.error("No document to save");
       return;
     }
 
     const newName = editValue().trim();
     if (!newName) {
-      alert("Document name cannot be empty");
+      toast.error("Document name cannot be empty");
       return;
     }
 
@@ -54,18 +55,19 @@ export default function DocumentProperties(props: DocumentPropertiesProps) {
         setDocumentName(newName);
         setIsEditing(false);
         setRefreshTrigger((n) => n + 1);
+        toast.success("Document name updated successfully");
       } else {
         const err = res.body as { error?: string };
-        alert("Error updating document: " + (err.error || "Unknown error"));
+        toast.error(`Error updating document: ${err.error || "Unknown error"}`);
       }
     } catch (e) {
-      alert("Error: " + e);
+      toast.error(`Error: ${e}`);
     }
   };
 
   const handleDelete = async () => {
     if (!props.documentId) {
-      alert("No document to delete");
+      toast.error("No document to delete");
       return;
     }
 
@@ -77,11 +79,12 @@ export default function DocumentProperties(props: DocumentPropertiesProps) {
         setRefreshTrigger((n) => n + 1);
         navigate("/");
         props.onDelete?.();
+        toast.success("Document deleted successfully");
       } else {
-        alert("Error deleting document");
+        toast.error("Error deleting document");
       }
     } catch (e) {
-      alert("Error: " + e);
+      toast.error(`Error: ${e}`);
     }
   };
 
@@ -111,10 +114,10 @@ export default function DocumentProperties(props: DocumentPropertiesProps) {
         setSelectedTags(newTags);
         setRefreshTrigger((n) => n + 1);
       } else {
-        alert("Error updating tags");
+        toast.error(`Error updating tags: ${(res.body as { error?: string }).error || "Unknown error"}`);
       }
     } catch (e) {
-      alert("Error: " + e);
+      toast.error(`Error: ${e}`);
     }
   };
 
@@ -173,7 +176,7 @@ export default function DocumentProperties(props: DocumentPropertiesProps) {
             </button>
           </div>
         </Show>
-        
+
         <Show when={props.documentId}>
           <button
             type="button"

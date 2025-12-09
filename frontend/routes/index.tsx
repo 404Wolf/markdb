@@ -1,36 +1,10 @@
 import { createSignal, onMount } from "solid-js";
 import { clientOnly } from "@solidjs/start";
+import { getOrCreateDemoUser, getOrCreateDemoDocumentAndSchema } from "~/lib/utils";
 import { clientApi } from "~/lib/api";
 
 const Editor = clientOnly(() => import("~/components/Editor"));
 const SchemaEditor = clientOnly(() => import("~/components/SchemaEditor"));
-
-async function getOrCreateUser(credentials: { email: string; name: string; password: string }) {
-  // Try to create user first
-  const createResult = await clientApi.users.create({
-    body: credentials
-  });
-  
-  if (createResult.status === 201) {
-    console.log("User created:", createResult.body);
-    return createResult.body._id;
-  }
-  
-  // If creation fails (user already exists), try to login
-  const loginResult = await clientApi.users.login({
-    body: {
-      email: credentials.email,
-      password: credentials.password
-    }
-  });
-  
-  if (loginResult.status === 200) {
-    console.log("User logged in:", loginResult.body);
-    return loginResult.body._id;
-  }
-  
-  return "";
-}
 
 export default function Home() {
   const [isValid, setIsValid] = createSignal<boolean | null>(null);
@@ -39,17 +13,23 @@ export default function Home() {
   const [leftWidth, setLeftWidth] = createSignal(50);
   let containerRef: HTMLDivElement | undefined;
 
-  const [userId, setUserId] = createSignal<string>("");
-
-  const placeholderUser = {
-    email: "test@example.com",
-    name: "Test User",
-    password: "password"
-  };
+  const [user, setUser] = createSignal<{ _id: string; email: string; name: string } | null>(null);
+  const [demoData, setDemoData] = createSignal<{
+    documentId: string;
+    documentName: string;
+    documentContent: string;
+    schemaId: string;
+    schemaContent: string;
+  } | null>(null);
 
   onMount(async () => {
-    const id = await getOrCreateUser(placeholderUser);
-    setUserId(id);
+    const userData = await getOrCreateDemoUser();
+    setUser(userData);
+    
+    const demo = await getOrCreateDemoDocumentAndSchema(userData._id);
+    setDemoData(demo);
+    setMarkdown(demo.documentContent);
+    setSchema(demo.schemaContent);
   });
 
   const handleMouseDown = (e: MouseEvent) => {
@@ -112,7 +92,16 @@ export default function Home() {
     <div class="flex flex-col h-[calc(100vh-2rem)] m-4">
       <div ref={containerRef} class="flex flex-1 gap-0">
         <div style={{ width: `${leftWidth()}%` }}>
-          <Editor onContentChange={handleMarkdownChange} schema={schema()} userId={userId()} />
+          <Editor 
+            onContentChange={handleMarkdownChange} 
+            schema={schema()} 
+            userId={user()?._id || ""}
+            initialContent={demoData()?.documentContent}
+            documentId={demoData()?.documentId}
+            documentName={demoData()?.documentName}
+            isValid={isValid()}
+            schemaId={demoData()?.schemaId}
+          />
         </div>
 
         <button
@@ -128,7 +117,10 @@ export default function Home() {
         />
 
         <div style={{ width: `${100 - leftWidth()}%` }}>
-          <SchemaEditor onSchemaChange={handleSchemaChange} />
+          <SchemaEditor 
+            onSchemaChange={handleSchemaChange}
+            initialContent={demoData()?.schemaContent}
+          />
         </div>
       </div>
 
@@ -137,9 +129,9 @@ export default function Home() {
           <p>MarkDB v0.0.0</p>
         </div>
         <div class="absolute right-4 bottom-4 text-sm text-gray-500">
-          <div>Email: {placeholderUser.email}</div>
-          <div>Name: {placeholderUser.name}</div>
-          <div>Id: {userId()}</div>
+          <div>Email: {user()?.email}</div>
+          <div>Name: {user()?.name}</div>
+          <div>Id: {user()?._id}</div>
         </div>
       </div>
     </div>

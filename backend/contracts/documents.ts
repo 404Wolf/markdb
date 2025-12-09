@@ -24,6 +24,7 @@ const createDocumentSchema = z.object({
 
 const updateDocumentSchema = z.object({
   name: z.string().optional(),
+  schemaId: z.string().optional(),
   content: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
