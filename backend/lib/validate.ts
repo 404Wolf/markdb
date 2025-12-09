@@ -40,7 +40,7 @@ export async function validate({
 
     await fs.writeFile(schemaFile, schema, "utf8");
 
-    const result = await execa(MDV_PATH, ["-", schemaFile, "-"], {
+    const result = await execa(MDV_PATH, [schemaFile, "-", "-"], {
       input,
     });
 

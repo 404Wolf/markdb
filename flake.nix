@@ -28,6 +28,7 @@
                 bun
                 prettierd
                 flyctl
+                mongosh
               ])
               ++ [
                 mdvalidate.packages.${system}.default

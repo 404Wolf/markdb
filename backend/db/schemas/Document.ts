@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const documentSchema = new Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, unique: true },
   schemaId: { type: Schema.Types.ObjectId, ref: "Schema", required: true },
   content: { type: String, required: true },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },

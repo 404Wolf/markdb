@@ -78,7 +78,7 @@ describe('Users API', () => {
 
       expect(response.statusCode).toBe(201);
       const body = JSON.parse(response.body);
-      
+
       const user = await User.findById(body._id).select('+password');
       expect(user?.password).toBeDefined();
       expect(user?.password).not.toBe(password); // Password should be hashed
@@ -196,10 +196,10 @@ describe('Users API', () => {
 
   describe('POST /api/users/login', () => {
     it('should login with valid credentials', async () => {
-      await User.create({ 
-        name: 'John Doe', 
-        email: 'john@example.com', 
-        password: 'password123' 
+      await User.create({
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123'
       });
 
       const response = await app.inject({
@@ -223,10 +223,10 @@ describe('Users API', () => {
     });
 
     it('should return 401 for invalid email', async () => {
-      await User.create({ 
-        name: 'John Doe', 
-        email: 'john@example.com', 
-        password: 'password123' 
+      await User.create({
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123'
       });
 
       const response = await app.inject({
@@ -244,10 +244,10 @@ describe('Users API', () => {
     });
 
     it('should return 401 for invalid password', async () => {
-      await User.create({ 
-        name: 'John Doe', 
-        email: 'john@example.com', 
-        password: 'password123' 
+      await User.create({
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123'
       });
 
       const response = await app.inject({
@@ -262,6 +262,36 @@ describe('Users API', () => {
       expect(response.statusCode).toBe(401);
       const body = JSON.parse(response.body);
       expect(body.error).toBe('Invalid email or password');
+    });
+  });
+
+  it('should list users', async () => {
+    await User.create({
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'password123'
+    });
+    await User.create({
+      name: 'Jane Doe',
+      email: 'jane@example.com',
+      password: 'password123'
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/users',
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.body);
+    expect(body).toHaveLength(2);
+    expect(body[0]).toMatchObject({
+      name: 'John Doe',
+      email: 'john@example.com',
+    });
+    expect(body[1]).toMatchObject({
+      name: 'Jane Doe',
+      email: 'jane@example.com',
     });
   });
 });

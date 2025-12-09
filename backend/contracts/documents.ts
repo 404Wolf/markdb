@@ -6,6 +6,7 @@ const c = initContract();
 const documentSchema = z.object({
   _id: z.string(),
   name: z.string(),
+  schemaId: z.string(),
   content: z.string(),
   author: z.string(),
   tags: z.array(z.string()),
@@ -23,6 +24,7 @@ const createDocumentSchema = z.object({
 
 const updateDocumentSchema = z.object({
   name: z.string().optional(),
+  schemaId: z.string().optional(),
   content: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });

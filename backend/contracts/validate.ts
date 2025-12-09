@@ -8,14 +8,16 @@ export const validateContract = c.router({
     method: 'POST',
     path: '/api/validate',
     responses: {
-      200: z.object({
-        success: z.literal(true),
-        output: z.record(z.any()),
-      }),
-      400: z.object({
-        success: z.literal(false),
-        error: z.string(),
-      }),
+      200: z.union([
+        z.object({
+          success: z.literal(true),
+          output: z.record(z.any()),
+        }),
+        z.object({
+          success: z.literal(false),
+          error: z.string(),
+        }),
+      ]),
     },
     body: z.object({
       input: z.string(),

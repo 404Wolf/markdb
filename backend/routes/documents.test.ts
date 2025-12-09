@@ -251,6 +251,71 @@ describe('Documents API', () => {
       });
     });
 
+    it('should update document schema and re-validate content', async () => {
+      // Create initial schema and document
+      const initialSchema = await Schema.create({ 
+        name: 'Initial Schema', 
+        content: '# Test' 
+      });
+
+      const document = await Document.create({
+        name: 'Test Document',
+        content: '# Test',
+        author: testUser._id,
+        schemaId: initialSchema._id,
+      });
+
+      // Create new schema that is compatible with the existing content
+      const newSchema = await Schema.create({ 
+        name: 'New Schema', 
+        content: '# Test' 
+      });
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/api/documents/${document._id}`,
+        payload: {
+          schemaId: newSchema._id.toString(),
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body).toMatchObject({
+        _id: document._id.toString(),
+        name: 'Test Document',
+        schemaId: newSchema._id.toString(),
+        content: '# Test',
+      });
+    });
+
+    it('should return 422 if content does not validate against new schema', async () => {
+      const document = await Document.create({
+        name: 'Test Document',
+        content: '# Test',
+        author: testUser._id,
+        schemaId: testSchema._id,
+      });
+
+      const strictSchema = await Schema.create({ 
+        name: 'Strict Schema', 
+        content: '# Strict\n\n- field1: string\n- field2: number' 
+      });
+
+      const response = await app.inject({
+        method: 'PUT',
+        url: `/api/documents/${document._id}`,
+        payload: {
+          schemaId: strictSchema._id.toString(),
+        },
+      });
+
+      expect(response.statusCode).toBe(422);
+      const body = JSON.parse(response.body);
+      expect(body.reason).toBe('validationError');
+      expect(body.error).toBeDefined();
+    });
+
     it('should return 404 for non-existent document', async () => {
       const fakeId = new mongoose.Types.ObjectId();
       const response = await app.inject({

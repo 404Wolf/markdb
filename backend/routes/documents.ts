@@ -16,6 +16,7 @@ export const documentsRouter = s.router(documentsContract, {
       body: documents.map(doc => ({
         _id: doc._id.toString(),
         name: doc.name,
+        schemaId: doc.schemaId.toString(),
         content: doc.content,
         author: doc.author.toString(),
         tags: doc.tags.map(tag => tag.toString()),
@@ -42,6 +43,7 @@ export const documentsRouter = s.router(documentsContract, {
       body: {
         _id: document._id.toString(),
         name: document.name,
+        schemaId: document.schemaId.toString(),
         content: document.content,
         author: document.author.toString(),
         tags: document.tags.map(tag => tag.toString()),
@@ -79,6 +81,7 @@ export const documentsRouter = s.router(documentsContract, {
         body: {
           _id: document._id.toString(),
           name: document.name,
+          schemaId: document.schemaId.toString(),
           content: document.content,
           author: document.author.toString(),
           tags: document.tags.map(tag => tag.toString()),
@@ -106,9 +109,13 @@ export const documentsRouter = s.router(documentsContract, {
         };
       }
 
-      // If content is being updated, validate it against the schema
-      if (body.content) {
-        const schemaDoc = await Schema.findById(document.schemaId);
+      // Determine which schema to validate against
+      const targetSchemaId = body.schemaId || document.schemaId;
+      const contentToValidate = body.content || document.content;
+      
+      // If schema or content is being updated, validate the content against the target schema
+      if (body.schemaId || body.content) {
+        const schemaDoc = await Schema.findById(targetSchemaId);
 
         if (!schemaDoc) {
           return {
@@ -117,7 +124,7 @@ export const documentsRouter = s.router(documentsContract, {
           };
         }
 
-        const validateResult = await validate({ input: body.content, schema: schemaDoc.content.toString() });
+        const validateResult = await validate({ input: contentToValidate, schema: schemaDoc.content.toString() });
 
         if (!validateResult.success) {
           return {
@@ -151,6 +158,7 @@ export const documentsRouter = s.router(documentsContract, {
         body: {
           _id: updatedDocument._id.toString(),
           name: updatedDocument.name,
+          schemaId: updatedDocument.schemaId.toString(),
           content: updatedDocument.content,
           author: updatedDocument.author.toString(),
           tags: updatedDocument.tags.map(tag => tag.toString()),
