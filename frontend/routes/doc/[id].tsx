@@ -100,6 +100,7 @@ export default function DocumentPage() {
               initialContent={doc()?.content}
               documentId={doc()?._id}
               documentName={doc()?.name}
+              documentTags={doc()?.tags}
               userId={userId}
             />
           </div>
