@@ -1,0 +1,42 @@
+erDiagram
+    USER ||--o{ DOCUMENT : author
+    SCHEMA ||--o{ DOCUMENT : defines
+    DOCUMENT ||--o{ EXTRACTED : generates
+    TAG ||--o{ DOCUMENT : labels
+
+    USER {
+        ObjectId _id
+        String name
+        String email
+        String password
+        Date createdAt
+    }
+
+    DOCUMENT {
+        ObjectId _id
+        String name
+        ObjectId schemaId
+        String content
+        ObjectId author
+        Date createdAt
+    }
+
+    EXTRACTED {
+        ObjectId _id
+        ObjectId forDocument
+        Mixed data
+        Date createdAt
+    }
+
+    SCHEMA {
+        ObjectId _id
+        String name
+        String content
+        Date createdAt
+    }
+
+    TAG {
+        ObjectId _id
+        String name
+        Date createdAt
+    }

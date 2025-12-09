@@ -2,6 +2,7 @@
   paper: "us-letter",
   margin: (x: 1in, y: 1in),
   numbering: "1",
+  columns: 2
 )
 
 #set text(
@@ -114,7 +115,9 @@ Imagine that you had a collection of many Markdown files, all grocery lists. Wha
 // Nick
 Describe the data your database manages.
 
-== Constraints
+== Database Relations and Normal Form
+
+#figure(image("er.png"), caption: [ER diagram for our database])
 
 // Our database stores users, tags, schemas, documents, and the loose actual extracted data from the documents.
 
@@ -159,15 +162,7 @@ const userSchema = new mongoose.Schema({
 
 In addition to just the actual types that the schemas enforce though, we still have important semantic constraints in our database. For documents in our database, we only want to ever store a document record if it validates against its given `schemaId` schema, and we would only like to be able to change a schema if it does not break any of the documents that it is attached to. This is a tricky relationship to enforce, and is something that we cannot express in Mongoose alone --- we've had to design our actual backend to run the validations before doing database mutations.
 
-= ER Diagram Design (Optional - Extra Credit)
-
-// Nick
-Include your ER diagram here with all entities, attributes, relationships, and their properties.
-// #figure(image("./path"), caption: [])
-
-= Functional Dependencies
-
-The biggest functional dependency in our design is that, given a document and its associated schema's contents joined together, the "Extracted" output can always be determined by actually running the validator. However, even though this is true we still store the result in the `extractedSchema` collection, because running this validation is relatively expensive.
+In @fig:3nf you can find a functional dependency table for our database system. The biggest functional dependency that we could not normalize in our design is that, given a document and its associated schema's contents joined together, the "Extracted" output can always be determined by actually running the validator. However, even though this is true we still store the result in the `extractedSchema` collection, because running this validation is relatively expensive. This is a functional dependency that is impossible to describe within the scope of our database system alone and must be managed in application code.
 
 #figure(
   table(
@@ -177,31 +172,24 @@ The biggest functional dependency in our design is that, given a document and it
 
     [Documents],
     [\_id $arrow.r$ name, schemaId, content, author, tags, createdAt \
-       name $arrow.r$ \_id, schemaId, content, author, tags, createdAt],
+       name $arrow.r$ \_id],
 
     [Extracted],
-    [\_id $arrow.r$ forDocument, createdAt, data \
-    forDocument, createdAt $arrow.r$ \_id, createdAt, data
-    ],
+    [\_id $arrow.r$ forDocument, createdAt, data ],
 
     [Schema],
     [\_id $arrow.r$ name, content, createdAt],
 
     [Tags],
     [\_id $arrow.r$ name, createdAt \
-       name $arrow.r$ \_id, createdAt],
+       name $arrow.r$ \_id],
 
     [Users],
     [\_id $arrow.r$ name, email, password, createdAt \
-       email $arrow.r$ \_id, name, password, createdAt],
+       email $arrow.r$ \_id],
   ),
   caption: [Minimal set of functional dependencies for each relation]
-)
-
-= Database Schema
-
-// Wolf
-Present your database schema satisfying 3NF (or BCNF).
+) <fig:3nf>
 
 == Normalization Analysis
 

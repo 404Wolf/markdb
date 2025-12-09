@@ -29,10 +29,12 @@
                 prettierd
                 flyctl
                 mongosh
+                mermaid-cli
               ])
               ++ [
                 mdvalidate.packages.${system}.default
               ];
+            TYPST_FONT_PATHS="${pkgs.fira}/share/fonts";
           };
         };
       }

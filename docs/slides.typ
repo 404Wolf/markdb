@@ -10,7 +10,7 @@
 )
 
 #front-slide(
-  title: "Project Title",
+  title: "MarkDB: a Markdown database",
   subtitle: [CSDS 341 Database Systems Final Project],
   authors: "Team Member Names",
   info: [Fall 2025 -- Final Project Presentation],
@@ -20,11 +20,142 @@
   Background
 ]
 
+#slide[
+  #stress("What is Markdown? A quick refresher.")
+
+  #cols(columns: (1fr, 1fr), gutter: 1.5em)[
+    - Markdown is a simple typesetting language designed to compile to HTML
+    - It's the "natural language" of LLMs. They output Markdown which becomes HTML
+    - It's *unstructured*, but we want enforce structure
+  ][
+    ````md
+    # Header
+    ## Subheader
+
+    ```py
+    print("hi")
+    ```
+
+    1. List
+    1. List 2
+    ````
+  ]
+]
+
 // Wolf
 #slide(title: "Project Overview")[
   = MarkDB is a markdown-first database system.
 
-  With MarkDB you can input unstructured input text data, and then apply a schema to enforce a shape on top of the data.
+  #v(1cm)
+
+  With MarkDB you can input unstructured input text data, and then apply a schema to enforce a shape on top of the data. It automatically runs a Markdown validator, and then stores your well-structured data in MongoDB.
+]
+
+#slide[
+  #stress("What is Markdown, and what do we want?")
+
+  #cols(columns: (1fr, 1fr), gutter: 1.5em)[
+    - Markdown is a simple typesetting language designed to compile to HTML
+    - It's the "natural language" of LLMs. They output Markdown which becomes HTML
+    - It's *unstructured*, but we want enforce structure
+  ][
+    ````md
+    # Header
+    ## Subheader
+
+    ```py
+    print("hi")
+    ```
+
+    1. List
+    1. List 2
+    ````
+  ]
+]
+
+#slide[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 1.5em,
+    [
+      *Input:*
+
+      ```md
+      # Hi there
+      ```
+    ],
+    [
+      *Schema:*
+
+      ```md
+      # Hi there
+      ```
+
+      (and no output)
+    ]
+  )
+]
+
+#slide[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 1.5em,
+    [
+      *Input:*
+
+      ```md
+      # Hi there
+      ```
+    ],
+    [
+      *Schema:*
+
+      ```md
+      # Hi `name:/[A-Z][a-z]+/`
+      ```
+
+      *Output:*
+
+      ```json
+      { "name": "there" }
+      ```
+    ]
+  )
+]
+
+#slide[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 1.5em,
+    [
+      *Input:*
+
+      ```md
+      # Hi Wolf
+
+      - test
+      - test2
+      ```
+    ],
+    [
+      *Schema:*
+
+      ```md
+      # Hi `name1:/[A-Z][a-z]+/`
+
+      - `name:/[A-Z][a-z]+/`+
+      ```
+
+      *Output:*
+
+      ```json
+      {
+        "name": ["test", "test2"],
+        "name1": "Wolf"
+      }
+      ```
+    ]
+  )
 ]
 
 #slide(title: "Use Cases")[
@@ -39,9 +170,11 @@
 #slide(title: "Prior Art")[
   = There's a lot of companies that try to make unstructured data useful, particularly for LLMs/vector use cases.
 
-  - Companies like Parseur & Unstructured.io
+  - Companies like Parseur & Unstructured.io offering "data injection + cleanup"
   - NLP libraries and techniques (e.g. Apache OpenNLP)
   - JSON-schema for enforcing structure on unstructured JSON blob data
+
+  Many of the use cases are AI driven; processing and transforming large amounts of unstructured data
 ]
 
 // Nick
