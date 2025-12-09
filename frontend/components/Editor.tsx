@@ -145,7 +145,7 @@ export default function Editor(props: EditorProps) {
       const updateBody: { content: string; schemaId?: string } = {
         content: content()
       };
-      
+
       // Include schema ID if it's been changed
       if (props.schemaId) {
         updateBody.schemaId = props.schemaId;
@@ -327,11 +327,13 @@ export default function Editor(props: EditorProps) {
 
       {/* Extracted Data Modal */}
       <Show when={showExtracted()}>
-        <div 
+        <button
+          type="button"
           class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           onClick={() => setShowExtracted(false)}
         >
-          <div 
+          <button
+            type="button"
             class="bg-neutral-800 rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -348,8 +350,8 @@ export default function Editor(props: EditorProps) {
             <pre class="text-white font-mono text-sm bg-neutral-900 p-4 rounded overflow-auto">
               {JSON.stringify(extractedData(), null, 2)}
             </pre>
-          </div>
-        </div>
+          </button>
+        </button>
       </Show>
     </div>
   );
