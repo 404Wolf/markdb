@@ -184,10 +184,12 @@
 
 // Nick
 #slide(title: "Core Features")[
-  - Feature 1: Live automatic validation
-  - Feature 2: Description
-  - Feature 3: Description
-  - Feature 4: Description
+  - *Live automatic validation*
+    - markdb gives you a side-by-side view of the document you're editing and the schema it belongs to. The separator will change colors in real time based on whether the document accurately follows the schema or not.
+  - *Markdown rendering*
+    - The web app also doubles as a rich text editor! You can either view your markdown files as plaintext or have them appear fully rendered with headings, bold, italic, lists, etc.
+  - *Tag system*
+    - markdb has a fully integrated tagging system. You can either assign tags manually to documents, or bulk-select by schema.
 ]
 
 // Wolf

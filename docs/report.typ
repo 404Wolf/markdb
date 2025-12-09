@@ -112,8 +112,13 @@ Imagine that you had a collection of many Markdown files, all grocery lists. Wha
 
 == Overview
 
-// Nick
-Describe the data your database manages.
+markdb primarily organizes two types of files: *documents* and *schemas*.
+
+*Documents* are ordinary plaintext files. These are assumed to conform to the Markdown language, but any plaintext document can be stored as a markdb document. Each document is associated with exactly one schema, which enforces a particular structure on the document.
+
+*Schemas* are a hybrid of the Markdown and regex grammars. Schemas match literal text by default, and complex rules are specified between backticks using regular expressions. For example, the final `+` in the expression ```- `item:/\w+/`+``` stands for "one or more of the preceding pattern". In this case, we have a nonempty list where each item consists of one or more word characters.
+
+For more information on mdvalidate and the schema specification, see appendix B.
 
 == Database Relations and Normal Form
 
@@ -203,8 +208,21 @@ List and describe the queries your system supports in SQL and Relational Algebra
 
 = Implementation
 
-// Nick
+
+
 == System Environment
+
+A more comprehensive account of each of these components may be found in appendix C.
+
+=== Operating System
+
+We provide Docker configuration for cross-platform deployment. For more information, see appendix C.
+
+=== DBMS
+
+markdb uses MongoDB to store both documents and schemas.
+
+=== Languages
 
 - Operating System
 - DBMS
