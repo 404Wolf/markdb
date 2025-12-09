@@ -2,7 +2,6 @@
   paper: "us-letter",
   margin: (x: 1in, y: 1in),
   numbering: "1",
-  columns: 2
 )
 
 #set text(
@@ -18,38 +17,49 @@
 #set heading(numbering: "1.1")
 
 #align(center)[
-  #v(2cm)
+  #v(3cm)
 
-  #text(size: 24pt, weight: "bold")[
+  #text(size: 32pt, weight: "bold")[
     MarkDB
-  ]
-
-  #v(1cm)
-
-  #text(size: 16pt)[
-    CSDS 341: Introduction to Database Systems
   ]
 
   #v(0.5cm)
 
-  #text(size: 14pt)[
+  #line(length: 60%, stroke: 0.5pt)
+
+  #v(1.5cm)
+
+  #text(size: 16pt, weight: "semibold")[
+    CSDS 341: Introduction to Database Systems
+  ]
+
+  #v(0.3cm)
+
+  #text(size: 14pt, style: "italic")[
     Fall 2025 Final Project Report
   ]
 
-  #v(2cm)
+  #v(3cm)
 
-  #text(size: 12pt)[
-    Team Members:
-
-    Name 1 Wolf Mermelstein
-    Name 2: Nick Mahdavi
+  #text(size: 13pt, weight: "semibold")[
+    Team Members
   ]
 
-  #v(2cm)
+  #v(0.5cm)
+
+  #text(size: 12pt)[
+    Wolf Mermelstein
+
+    Nick Mahdavi
+  ]
+
+  #v(1fr)
 
   #text(size: 12pt)[
     December 8, 2025
   ]
+
+  #v(2cm)
 ]
 
 #pagebreak()
@@ -60,6 +70,8 @@
 )
 
 #pagebreak()
+
+#set page(columns: 2)
 
 = Application Background
 
@@ -127,43 +139,6 @@ For more information on mdvalidate and the schema specification, see appendix B.
 // Our database stores users, tags, schemas, documents, and the loose actual extracted data from the documents.
 
 Since we use Mongodb for our actual database management system, to enforce schemas we used Mongoose. Mongoose is a typescript library that makes it easy to store well structured data in Mongodb. The actual schemas were as follows
-
-#figure(
-```ts
-const documentSchema = new Schema({
-  name: { type: String, required: true, unique: true },
-  schemaId: { type: Schema.Types.ObjectId, ref: "Schema", required: true },
-  content: { type: String, required: true },
-  author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
-  createdAt: { type: Date, default: Date.now }
-});
-
-const extractedSchema = new mongoose.Schema({
-  forDocument: { type: mongoose.Schema.Types.ObjectId, ref: "Document", required: true },
-  createdAt: { type: Date, default: Date.now },
-  data: { type: mongoose.Schema.Types.Mixed }
-});
-
-const schemaSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
-
-const tagSchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true },
-  createdAt: { type: Date, default: Date.now }
-});
-
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true, select: false }, // (salted + hashed)
-  createdAt: { type: Date, default: Date.now }
-});
-```, caption: [Our database's schemas, in Mongoose typescript]
-)
 
 In addition to just the actual types that the schemas enforce though, we still have important semantic constraints in our database. For documents in our database, we only want to ever store a document record if it validates against its given `schemaId` schema, and we would only like to be able to change a schema if it does not break any of the documents that it is attached to. This is a tricky relationship to enforce, and is something that we cannot express in Mongoose alone --- we've had to design our actual backend to run the validations before doing database mutations.
 
@@ -253,24 +228,42 @@ Project summary and achievements.
 
 #pagebreak()
 
-// Nick
-= Appendix A: Installation Manual
+= Appendix
 
-Installation steps and prerequisites.
+#place(top, scope: "parent", float: true,
+figure(
+```ts
+const documentSchema = new Schema({
+  name: { type: String, required: true, unique: true },
+  schemaId: { type: Schema.Types.ObjectId, ref: "Schema", required: true },
+  content: { type: String, required: true },
+  author: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
+  createdAt: { type: Date, default: Date.now }
+});
 
-// Nick
-= Appendix B: User Manual
+const extractedSchema = new mongoose.Schema({
+  forDocument: { type: mongoose.Schema.Types.ObjectId, ref: "Document", required: true },
+  createdAt: { type: Date, default: Date.now },
+  data: { type: mongoose.Schema.Types.Mixed }
+});
 
-How to use the application.
+const schemaSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  content: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
 
-// Nick
-= Appendix C: Programmer's Manual
+const tagSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  createdAt: { type: Date, default: Date.now }
+});
 
-Code documentation and architecture.
-
-// Nick
-= Appendix D: Sample Data and Output
-
-// Nick
-// (use typst grid)
-Screenshots and sample data.
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true, select: false }, // (salted + hashed)
+  createdAt: { type: Date, default: Date.now }
+});
+```, caption: [Our database's schemas, in Mongoose typescript]
+))
