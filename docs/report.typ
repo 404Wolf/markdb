@@ -71,8 +71,6 @@
 
 #pagebreak()
 
-#set page(columns: 2)
-
 = Application Background
 
 // Wolf
@@ -177,6 +175,8 @@ In @fig:3nf you can find a functional dependency table for our database system. 
 Explain why each relation is in 3NF or BCNF.
 
 = Example Queries
+
+We're using Mongodb but for completion we have included this section using regular Postgres compliant queries. Mongodb is No-SQL and has its own query syntax.
 
 == Get all documents with extracted data
 

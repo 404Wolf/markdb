@@ -12,7 +12,7 @@
 #front-slide(
   title: "MarkDB: a Markdown database",
   subtitle: [CSDS 341 Database Systems Final Project],
-  authors: "Team Member Names",
+  authors: "Wolf Mermelstein and Nick Mahdavi",
   info: [Fall 2025 -- Final Project Presentation],
 )
 
@@ -25,8 +25,7 @@
 
   #cols(columns: (1fr, 1fr), gutter: 1.5em)[
     - Markdown is a simple typesetting language designed to compile to HTML
-    - It's the "natural language" of LLMs. They output Markdown which becomes HTML
-    - It's *unstructured*, but we want enforce structure
+    - It's *unstructured*, but we want enforce structure, so we use a tool called `mdvalidate`
   ][
     ````md
     # Header
@@ -42,35 +41,17 @@
   ]
 ]
 
-// Wolf
-#slide(title: "Project Overview")[
-  = MarkDB is a markdown-first database system.
-
-  #v(1cm)
-
-  With MarkDB you can input unstructured input text data, and then apply a schema to enforce a shape on top of the data. It automatically runs a Markdown validator, and then stores your well-structured data in MongoDB.
-]
-
-#slide[
-  #stress("What is Markdown, and what do we want?")
-
-  #cols(columns: (1fr, 1fr), gutter: 1.5em)[
-    - Markdown is a simple typesetting language designed to compile to HTML
-    - It's the "natural language" of LLMs. They output Markdown which becomes HTML
-    - It's *unstructured*, but we want enforce structure
-  ][
-    ````md
-    # Header
-    ## Subheader
-
-    ```py
-    print("hi")
-    ```
-
-    1. List
-    1. List 2
-    ````
-  ]
+#title-slide[
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 1.5em,
+    [
+      What is `mdvalidate`?
+    ],
+    [
+      #image("mdvalidate.png")
+    ]
+  )
 ]
 
 #slide[
@@ -104,7 +85,7 @@
       *Input:*
 
       ```md
-      # Hi there
+      # Hi World
       ```
     ],
     [
@@ -117,7 +98,7 @@
       *Output:*
 
       ```json
-      { "name": "there" }
+      { "name": "World" }
       ```
     ]
   )
@@ -158,6 +139,16 @@
   )
 ]
 
+// Wolf
+#slide(title: "Project Overview")[
+  = MarkDB is a markdown-first database system.
+
+  #v(1cm)
+
+  With MarkDB you can input unstructured input text data, and then apply a schema to enforce a shape on top of the data. It automatically runs a Markdown validator, and then stores your well-structured data in MongoDB.
+]
+
+
 #slide(title: "Use Cases")[
   = Some example use cases include:
 
@@ -170,7 +161,7 @@
 #slide(title: "Prior Art")[
   = There's a lot of companies that try to make unstructured data useful, particularly for LLMs/vector use cases.
 
-  - Companies like Parseur & Unstructured.io offering "data injection + cleanup"
+  - Companies like Parseur & Unstructured.io offering "data ingestion + cleanup"
   - NLP libraries and techniques (e.g. Apache OpenNLP)
   - JSON-schema for enforcing structure on unstructured JSON blob data
 
@@ -194,9 +185,10 @@
 
 // Wolf
 #slide(title: "Database Operations")[
-  - Key queries supported
-  - CRUD operations implemented
-  - Any special database features (triggers, stored procedures, etc.)
+  - You can view all your documents, rename them, and delete them
+  - You can add tags, tag documents, and search documents by tag
+  - You can reassign and create schemas
+  - With the CLI you can create and manage your schemas, documents, and users
 ]
 
 // Nick
@@ -212,14 +204,14 @@
   - *Other Tools*: (e.g., frameworks, libraries, deployment tools)
 ]
 
-#title-slide[
-  Team Member Roles
-]
+// #title-slide[
+//   Team Member Roles
+// ]
 
-#slide(title: "Project Contributions")[
-  - *Wolf*: Backend and CLI
-  - *Nick*: Frontend
-]
+// #slide(title: "Project Contributions")[
+//   - *Wolf*: Backend and CLI
+//   - *Nick*: Frontend
+// ]
 
 #title-slide[
   Demo!
@@ -234,14 +226,14 @@
   - Viewing the extracted information
 ]
 
-#title-slide[
-  Questions?
-]
+// #title-slide[
+//   Questions?
+// ]
 
-// Nick
-#slide(title: "What we Learned")[
+// // Nick
+// #slide(title: "What we Learned")[
 
-]
+// ]
 
 #slide[
   Thank you!
